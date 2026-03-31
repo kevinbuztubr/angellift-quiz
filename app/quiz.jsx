@@ -135,7 +135,7 @@ function WelcomeStep({ onStart }) {
   return (
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      flex: 1, padding: "24px 24px", textAlign: "center",
+      flex: 1, padding: "20px 28px", textAlign: "center",
       opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)",
       transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
@@ -173,19 +173,19 @@ function AreasStep({ selected, onToggle, onNext }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
   return (
-    <div style={{ padding: "16px 24px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+    <div style={{ padding: "4px 20px 16px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <StepIndicator current={1} total={4} />
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 34px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.2, margin: "8px 0 4px" }}>
         Which areas would you<br />like to <span style={{ fontStyle: "italic" }}>correct</span>?
       </h2>
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", marginBottom: 12 }}>Select all that apply</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 8, flex: 1, minHeight: 0 }}>
         {AREAS.map((area, i) => {
           const isSelected = selected.includes(area.id);
           return (
             <button key={area.id} onClick={() => onToggle(area.id)} style={{
               position: "relative", overflow: "hidden", borderRadius: 16, cursor: "pointer",
-              border: isSelected ? "3px solid #8B7355" : "3px solid transparent", padding: 0, background: "none", aspectRatio: "1", minHeight: 150,
+              border: isSelected ? "3px solid #8B7355" : "3px solid transparent", padding: 0, background: "none", minHeight: 0,
               transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
               transform: isSelected ? "scale(1.03)" : "scale(1)",
               boxShadow: isSelected ? "0 6px 24px rgba(139, 115, 85, 0.25)" : "0 2px 8px rgba(0,0,0,0.08)",
@@ -270,7 +270,7 @@ function PhotoStep({ onPhoto, onSkip }) {
 
   if (analyzing) {
     return (
-      <div style={{ padding: "16px 24px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+      <div style={{ padding: "20px 24px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
         <div style={{ position: "relative", width: 120, height: 120, marginBottom: 32 }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: "50%", border: "3px solid #EDEAE5", borderTopColor: "#8B7355", animation: "spin 0.8s linear infinite" }} />
           <div style={{ position: "absolute", top: 12, left: 12, right: 12, bottom: 12, borderRadius: "50%", overflow: "hidden" }}>
@@ -296,12 +296,12 @@ function PhotoStep({ onPhoto, onSkip }) {
 
   if (captured) {
     return (
-      <div style={{ padding: "16px 24px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transition: "all 0.6s ease" }}>
+      <div style={{ padding: "4px 20px 16px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transition: "all 0.6s ease" }}>
         <StepIndicator current={2} total={4} />
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.2, margin: "8px 0 12px" }}>
           Looking <span style={{ fontStyle: "italic" }}>great</span>!
         </h2>
-        <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 16, flex: 1, maxHeight: 400, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+        <div style={{ borderRadius: 16, overflow: "hidden", marginBottom: 12, flex: 1, minHeight: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
           <img src={captured} alt="Your photo" style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} />
         </div>
         <div style={{ display: "flex", gap: 12 }}>
@@ -313,7 +313,7 @@ function PhotoStep({ onPhoto, onSkip }) {
   }
 
   return (
-    <div style={{ padding: "16px 24px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+    <div style={{ padding: "4px 20px 16px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <StepIndicator current={2} total={4} />
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.2, margin: "8px 0 4px" }}>
         Let’s take a quick <span style={{ fontStyle: "italic" }}>look</span>
@@ -323,7 +323,7 @@ function PhotoStep({ onPhoto, onSkip }) {
       </p>
       {!cameraActive ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, flex: 1 }}>
-          <div style={{ width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
+          <div style={{ width: "100%", flex: 1, minHeight: 0, borderRadius: 16, overflow: "hidden", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(139,115,85,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
@@ -336,7 +336,7 @@ function PhotoStep({ onPhoto, onSkip }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, flex: 1 }}>
-          <div style={{ width: "100%", aspectRatio: "1", flex: 1, minHeight: 180, maxHeight: 400, borderRadius: 20, overflow: "hidden", position: "relative", background: "#000" }}>
+          <div style={{ width: "100%", flex: 1, minHeight: 0, borderRadius: 16, overflow: "hidden", position: "relative", background: "#000" }}>
             <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
             <svg style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
               <defs><mask id="guideMask"><rect width="300" height="300" fill="white"/><ellipse cx="150" cy="155" rx="95" ry="75" fill="black"/></mask></defs>
@@ -368,11 +368,11 @@ function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSe
   const [visible, setVisible] = useState(false);
   useEffect(() => { setVisible(false); setTimeout(() => setVisible(true), 50); }, [question]);
   return (
-    <div style={{ padding: "16px 24px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+    <div style={{ padding: "4px 20px 16px", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <StepIndicator current={stepNum} total={4} />
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 34px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.2, margin: "8px 0 6px" }}>{question}</h2>
       {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", marginBottom: 16 }}>{subtitle}</p>}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: subtitle ? 0 : 16, flex: 1, justifyContent: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: subtitle ? 0 : 12 }}>
         {options.map((opt, i) => {
           const isSelected = selected === opt.id;
           return (
@@ -547,7 +547,7 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
   const { primary, secondary, reason } = getRecommendations(areas, solution, braces);
 
   return (
-    <div style={{ padding: "32px 24px", paddingBottom: 100, opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+    <div style={{ padding: "24px 20px 100px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#3D3428", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
           ✨ Your Personalized Results
@@ -601,24 +601,20 @@ export default function AngelLiftQuiz() {
   return (
     <>
       <style>{`
-        /* fonts loaded in layout.js head */
         *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; }
         button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #C4A882; outline-offset: 2px; }
-        input { font-size: 16px !important; } /* prevent iOS zoom on input focus */
-        @supports not (height: 100dvh) { .quiz-shell { height: 100vh !important; } }
-        .quiz-scroll { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        input { font-size: 16px !important; }
+        .qz { height: 100vh; height: 100dvh; }
         @media (min-width: 768px) {
-          .quiz-desktop-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-          .quiz-shell { height: min(700px, 90vh) !important; min-height: auto !important; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; overflow: hidden; }
-        }
-        @media (max-height: 700px) {
-          .quiz-shell { height: 100dvh !important; min-height: 100vh !important; }
+          .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+          .qz { height: min(720px, 88vh) !important; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; }
         }
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
-      <div className="quiz-desktop-bg"><div className="quiz-shell" style={{ maxWidth: 440, margin: "0 auto", width: "100%", height: "100dvh", minHeight: "100vh", display: "flex", flexDirection: "column", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="qz-bg"><div className="qz" style={{ maxWidth: 440, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
         {step > STEPS.WELCOME && step < STEPS.RESULTS && (
           <>
             <ProgressBar step={step} total={5} />
@@ -627,7 +623,8 @@ export default function AngelLiftQuiz() {
             </button>
           </>
         )}
-        <div ref={containerRef} className="quiz-scroll" style={{ flex: 1, overflowY: step === STEPS.RESULTS ? "auto" : "hidden", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", paddingTop: step > STEPS.WELCOME && step < STEPS.RESULTS ? 44 : 0 }}>
+        <div ref={containerRef} style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: step === STEPS.RESULTS ? "auto" : "hidden", overflowX: "hidden", WebkitOverflowScrolling: "touch", position: "relative" }}>
+          {step > STEPS.WELCOME && step < STEPS.RESULTS && <div style={{ height: 36, flexShrink: 0 }} />}
           {step === STEPS.WELCOME && <WelcomeStep onStart={() => goTo(STEPS.AREAS)} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.PHOTO)} />}
           {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.CURRENT_SOLUTION); }} onSkip={() => goTo(STEPS.CURRENT_SOLUTION)} />}
