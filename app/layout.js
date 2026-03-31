@@ -1,7 +1,12 @@
 export const metadata = {
   title: 'AngelLift® Quiz - Find Your Perfect DermaStrip',
   description: 'Take our 60-second quiz to discover the right DermaStrip for your unique needs.',
-  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {
