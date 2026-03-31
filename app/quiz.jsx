@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const STEPS = {
   WELCOME: 0,
   AREAS: 1,
-  CURRENT_SOLUTION: 2,
-  BRACES: 3,
-  EMAIL_CAPTURE: 4,
-  RESULTS: 5,
+  PHOTO: 2,
+  CURRENT_SOLUTION: 3,
+  BRACES: 4,
+  EMAIL_CAPTURE: 5,
+  RESULTS: 6,
 };
 
 const IMG_ENHANCE = "data:image/jpeg;base64,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";
@@ -56,7 +57,7 @@ function ProgressBar({ step, total }) {
 
 function StepIndicator({ current, total }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "\'DM Sans\', sans-serif", fontSize: 12, color: "#9A8E82", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#9A8E82", letterSpacing: "0.08em", textTransform: "uppercase" }}>
       <span style={{ color: "#6B5D4F", fontWeight: 600 }}>{current}</span>
       <span>/</span>
       <span>{total}</span>
@@ -76,22 +77,22 @@ function WelcomeStep({ onStart }) {
       transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
       <div style={{ width: 80, height: 1, background: "linear-gradient(90deg, transparent, #C4A882, transparent)", marginBottom: 32 }} />
-      <div style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#C4A882", marginBottom: 20 }}>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#C4A882", marginBottom: 20 }}>
         AngelLift®
       </div>
-      <h1 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: "clamp(28px, 6vw, 42px)", fontWeight: 300, color: "#3D3428", lineHeight: 1.2, marginBottom: 16, maxWidth: 440 }}>
+      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 42px)", fontWeight: 300, color: "#3D3428", lineHeight: 1.2, marginBottom: 16, maxWidth: 440 }}>
         Discover Your Perfect<br />
         <span style={{ fontStyle: "italic", fontWeight: 500, color: "#6B5D4F" }}>DermaStrip</span>
       </h1>
-      <p style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 15, color: "#8A7E72", lineHeight: 1.7, maxWidth: 360, marginBottom: 8 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#8A7E72", lineHeight: 1.7, maxWidth: 360, marginBottom: 8 }}>
         Take our 60-second quiz to find the right solution for your unique needs.
       </p>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 40, fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, color: "#A89880" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 40, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#A89880" }}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.8 3.8 14l.8-4.7L1.2 6l4.7-.7L8 1z" fill="#C4A882"/></svg>
         100% Money-Back Guarantee
       </div>
       <button onClick={onStart} style={{
-        fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, fontWeight: 600,
+        fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
         letterSpacing: "0.15em", textTransform: "uppercase",
         padding: "18px 52px", border: "none", borderRadius: 50,
         background: "linear-gradient(135deg, #6B5D4F 0%, #8B7355 50%, #6B5D4F 100%)",
@@ -104,7 +105,7 @@ function WelcomeStep({ onStart }) {
       >Start Quiz</button>
       <div style={{ display: "flex", gap: 24, marginTop: 40, opacity: 0.5 }}>
         {["🌿 Clean", "🇺🇸 Made in USA", "💯 Guaranteed"].map(t => (
-          <span key={t} style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 11, color: "#8A7E72", letterSpacing: "0.05em" }}>{t}</span>
+          <span key={t} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#8A7E72", letterSpacing: "0.05em" }}>{t}</span>
         ))}
       </div>
     </div>
@@ -117,12 +118,11 @@ function AreasStep({ selected, onToggle, onNext }) {
 
   return (
     <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
-      <StepIndicator current={1} total={3} />
-      <h2 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 8px" }}>
+      <StepIndicator current={1} total={4} />
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 8px" }}>
         Which areas would you<br />like to <span style={{ fontStyle: "italic" }}>correct</span>?
       </h2>
-      <p style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#9A8E82", marginBottom: 24 }}>Select all that apply</p>
-
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", marginBottom: 24 }}>Select all that apply</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {AREAS.map((area, i) => {
           const isSelected = selected.includes(area.id);
@@ -136,37 +136,20 @@ function AreasStep({ selected, onToggle, onNext }) {
               boxShadow: isSelected ? "0 6px 24px rgba(139, 115, 85, 0.25)" : "0 2px 8px rgba(0,0,0,0.08)",
               animation: visible ? `fadeSlideUp 0.5s ${i * 0.1}s both` : "none",
             }}>
-              <img src={area.img} alt={area.label} style={{
-                width: "100%", height: "100%", objectFit: "cover", display: "block", borderRadius: 13,
-              }} />
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 12px 12px",
-                background: "linear-gradient(transparent, rgba(0,0,0,0.5))",
-                borderRadius: "0 0 13px 13px",
-              }}>
-                <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, fontWeight: 600, color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-                  {area.label}
-                </div>
+              <img src={area.img} alt={area.label} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", borderRadius: 13 }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 12px 12px", background: "linear-gradient(transparent, rgba(0,0,0,0.5))", borderRadius: "0 0 13px 13px" }}>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>{area.label}</div>
               </div>
-              <div style={{
-                position: "absolute", top: 10, right: 10, width: 26, height: 26,
-                borderRadius: "50%", border: isSelected ? "none" : "2px solid rgba(255,255,255,0.7)",
-                background: isSelected ? "#6B5D4F" : "rgba(255,255,255,0.2)",
-                backdropFilter: "blur(4px)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.3s ease",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-              }}>
+              <div style={{ position: "absolute", top: 10, right: 10, width: 26, height: 26, borderRadius: "50%", border: isSelected ? "none" : "2px solid rgba(255,255,255,0.7)", background: isSelected ? "#6B5D4F" : "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s ease", boxShadow: "0 2px 6px rgba(0,0,0,0.15)" }}>
                 {isSelected && <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
               </div>
             </button>
           );
         })}
       </div>
-
       <button onClick={onNext} disabled={selected.length === 0} style={{
         width: "100%", marginTop: 24, padding: "16px 32px",
-        fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, fontWeight: 600,
+        fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
         letterSpacing: "0.1em", textTransform: "uppercase",
         border: "none", borderRadius: 50, cursor: selected.length > 0 ? "pointer" : "default",
         background: selected.length > 0 ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "#E5E1DB",
@@ -178,15 +161,235 @@ function AreasStep({ selected, onToggle, onNext }) {
   );
 }
 
+function PhotoStep({ onPhoto, onSkip }) {
+  const [visible, setVisible] = useState(false);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [captured, setCaptured] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => { return () => stopCamera(); }, [stopCamera]);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setCameraActive(true);
+    } catch (err) {
+      console.error("Camera error:", err);
+      alert("Could not access camera. You can skip this step — no worries!");
+    }
+  };
+
+  const takePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const size = Math.min(video.videoWidth, video.videoHeight);
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    const sx = (video.videoWidth - size) / 2;
+    const sy = (video.videoHeight - size) / 2;
+    ctx.translate(size, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+    setCaptured(dataUrl);
+    stopCamera();
+    setCameraActive(false);
+  };
+
+  const retake = () => {
+    setCaptured(null);
+    startCamera();
+  };
+
+  const confirm = () => {
+    setAnalyzing(true);
+    setTimeout(() => {
+      onPhoto(captured);
+    }, 2200);
+  };
+
+  if (analyzing) {
+    return (
+      <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 400, textAlign: "center" }}>
+        <div style={{ position: "relative", width: 120, height: 120, marginBottom: 32 }}>
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px solid #EDEAE5", borderTopColor: "#8B7355", animation: "spin 1s linear infinite" }} />
+          <div style={{ position: "absolute", inset: 12, borderRadius: "50%", overflow: "hidden" }}>
+            <img src={captured} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        </div>
+        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 400, color: "#3D3428", marginBottom: 8 }}>
+          Analyzing your <span style={{ fontStyle: "italic" }}>skin</span>...
+        </h3>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82" }}>
+          This will just take a moment
+        </p>
+      </div>
+    );
+  }
+
+  if (captured) {
+    return (
+      <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transition: "all 0.6s ease" }}>
+        <StepIndicator current={2} total={4} />
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 20px" }}>
+          Looking <span style={{ fontStyle: "italic" }}>great</span>!
+        </h2>
+        <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 24, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+          <img src={captured} alt="Your photo" style={{ width: "100%", display: "block", aspectRatio: "1", objectFit: "cover" }} />
+        </div>
+        <div style={{ display: "flex", gap: 12 }}>
+          <button onClick={retake} style={{
+            flex: 1, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+            border: "2px solid #6B5D4F", borderRadius: 50, cursor: "pointer", background: "transparent", color: "#6B5D4F",
+          }}>Retake</button>
+          <button onClick={confirm} style={{
+            flex: 2, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            border: "none", borderRadius: 50, cursor: "pointer",
+            background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
+            boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)",
+          }}>Use This Photo</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+      <StepIndicator current={2} total={4} />
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 6px" }}>
+        Let’s take a quick <span style={{ fontStyle: "italic" }}>look</span>
+      </h2>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, marginBottom: 20 }}>
+        A quick snapshot of just your mouth area helps us personalize your recommendation. We don’t store or save your photo.
+      </p>
+
+      {!cameraActive ? (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <div style={{
+            width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden",
+            background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16,
+          }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(139,115,85,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B7355", textAlign: "center", maxWidth: 200 }}>
+              Just the lower half of your face — nose to chin
+            </p>
+          </div>
+
+          <button onClick={startCamera} style={{
+            width: "100%", padding: "16px 32px",
+            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            border: "none", borderRadius: 50, cursor: "pointer",
+            background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
+            boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)",
+          }}>Open Camera</button>
+
+          <button onClick={onSkip} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#B5AEA4",
+          }}>
+            If you’d prefer not to, no worries — <span style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>skip ahead</span>
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <div style={{ width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden", position: "relative", background: "#000" }}>
+            <video ref={videoRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
+
+            {/* Face guide overlay */}
+            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
+              {/* Dim overlay with cutout */}
+              <defs>
+                <mask id="guideMask">
+                  <rect width="300" height="300" fill="white"/>
+                  <ellipse cx="150" cy="155" rx="95" ry="75" fill="black"/>
+                </mask>
+              </defs>
+              <rect width="300" height="300" fill="rgba(0,0,0,0.35)" mask="url(#guideMask)"/>
+
+              {/* Guide ellipse */}
+              <ellipse cx="150" cy="155" rx="95" ry="75" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeDasharray="8 4"/>
+
+              {/* Crosshair lines */}
+              <line x1="150" y1="110" x2="150" y2="130" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+              <line x1="150" y1="180" x2="150" y2="200" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+              <line x1="85" y1="155" x2="105" y2="155" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+              <line x1="195" y1="155" x2="215" y2="155" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+
+              {/* Corner brackets */}
+              <path d="M70 105 L70 90 L85 90" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M230 105 L230 90 L215 90" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M70 205 L70 220 L85 220" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M230 205 L230 220 L215 220" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
+
+              {/* Label */}
+              <text x="150" y="245" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="11" fontFamily="sans-serif">Align your mouth area here</text>
+            </svg>
+          </div>
+
+          <canvas ref={canvasRef} style={{ display: "none" }} />
+
+          {/* Capture button */}
+          <button onClick={takePhoto} style={{
+            width: 72, height: 72, borderRadius: "50%", border: "4px solid #C4A882",
+            background: "white", cursor: "pointer", padding: 0, position: "relative",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+          }}>
+            <div style={{ width: "100%", height: "100%", borderRadius: "50%", border: "3px solid transparent", background: "white", transition: "all 0.2s" }}
+              onMouseEnter={e => e.target.style.background = "#F0E8DD"}
+              onMouseLeave={e => e.target.style.background = "white"}
+            />
+          </button>
+
+          <button onClick={() => { stopCamera(); setCameraActive(false); onSkip(); }} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)",
+          }}>
+            Skip this step
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSelect, onNext }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setVisible(false); setTimeout(() => setVisible(true), 50); }, [question]);
 
   return (
     <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
-      <StepIndicator current={stepNum} total={3} />
-      <h2 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 8px" }}>{question}</h2>
-      {subtitle && <p style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#9A8E82", marginBottom: 28 }}>{subtitle}</p>}
+      <StepIndicator current={stepNum} total={4} />
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 8px" }}>{question}</h2>
+      {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", marginBottom: 28 }}>{subtitle}</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: subtitle ? 0 : 28 }}>
         {options.map((opt, i) => {
           const isSelected = selected === opt.id;
@@ -203,8 +406,8 @@ function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSe
             }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, background: isSelected ? "rgba(139, 115, 85, 0.12)" : "rgba(0,0,0,0.03)", transition: "all 0.3s ease", flexShrink: 0 }}>{opt.icon}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 15, fontWeight: 600, color: isSelected ? "#3D3428" : "#5A4F43" }}>{opt.label}</div>
-                {opt.detail && <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 12, color: "#A89880", marginTop: 2 }}>{opt.detail}</div>}
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: isSelected ? "#3D3428" : "#5A4F43" }}>{opt.label}</div>
+                {opt.detail && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#A89880", marginTop: 2 }}>{opt.detail}</div>}
               </div>
               <div style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, border: isSelected ? "none" : "2px solid #D4CFC8", background: isSelected ? "#6B5D4F" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s ease" }}>
                 {isSelected && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -224,24 +427,24 @@ function EmailCaptureStep({ email, onEmailChange, onSubmit, onSkip }) {
   return (
     <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ width: 64, height: 64, borderRadius: "50%", marginBottom: 24, background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🎁</div>
-      <h2 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 28, fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
         Your results are <span style={{ fontStyle: "italic" }}>ready</span>
       </h2>
-      <p style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
         Enter your email to unlock your personalized recommendation and receive an exclusive discount.
       </p>
       <div style={{ width: "100%", maxWidth: 380, marginBottom: 12 }}>
         <input type="email" value={email} onChange={e => onEmailChange(e.target.value)} placeholder="your@email.com"
-          style={{ width: "100%", padding: "16px 20px", border: "2px solid #EDEAE5", borderRadius: 14, fontFamily: "\'DM Sans\', sans-serif", fontSize: 15, color: "#3D3428", background: "#FAFAF7", outline: "none", transition: "border-color 0.3s ease", boxSizing: "border-box" }}
+          style={{ width: "100%", padding: "16px 20px", border: "2px solid #EDEAE5", borderRadius: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#3D3428", background: "#FAFAF7", outline: "none", transition: "border-color 0.3s ease", boxSizing: "border-box" }}
           onFocus={e => e.target.style.borderColor = "#C4A882"} onBlur={e => e.target.style.borderColor = "#EDEAE5"} />
       </div>
-      <button onClick={onSubmit} style={{ width: "100%", maxWidth: 380, padding: "16px 32px", fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", transition: "all 0.3s ease", marginBottom: 16 }}>
+      <button onClick={onSubmit} style={{ width: "100%", maxWidth: 380, padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", transition: "all 0.3s ease", marginBottom: 16 }}>
         View My Results
       </button>
-      <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, color: "#B5AEA4", textDecoration: "underline", textUnderlineOffset: 3 }}>
+      <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#B5AEA4", textDecoration: "underline", textUnderlineOffset: 3 }}>
         Skip for now
       </button>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 24, fontFamily: "\'DM Sans\', sans-serif", fontSize: 11, color: "#C4BDB4" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 24, fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#C4BDB4" }}>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5a2.5 2.5 0 00-2.5 2.5v2h-.25a.75.75 0 00-.75.75v3.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-3.5a.75.75 0 00-.75-.75H8.5V4A2.5 2.5 0 006 1.5zM4.5 4a1.5 1.5 0 013 0v2h-3V4z" fill="#C4BDB4"/></svg>
         We respect your privacy. Unsubscribe anytime.
       </div>
@@ -261,15 +464,15 @@ function StarRating({ rating }) {
   );
 }
 
-function ResultsStep({ areas, solution, braces }) {
+function ResultsStep({ areas, solution, braces, photo }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
 
   const getRecommendation = () => {
     if (areas.length >= 2 || areas.includes("nasolabial") || areas.includes("marionette")) {
-      return { primary: 1, reason: "Based on multiple treatment areas, our Advanced DermaStrips provide maximum correction and coverage." };
+      return { primary: 1, reason: "Based on your skin analysis and multiple treatment areas, our Advanced DermaStrips provide maximum correction and coverage." };
     }
-    return { primary: 0, reason: "Our Original DermaStrips are the perfect starting point for targeted correction." };
+    return { primary: 0, reason: "Based on your skin analysis, our Original DermaStrips are the perfect starting point for targeted correction." };
   };
 
   const rec = getRecommendation();
@@ -277,14 +480,14 @@ function ResultsStep({ areas, solution, braces }) {
   return (
     <div style={{ padding: "32px 24px 100px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "\'DM Sans\', sans-serif", fontSize: 12, fontWeight: 600, color: "#6B5D4F", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: "#6B5D4F", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
           ✨ Your Personalized Results
         </div>
-        <h2 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
           We recommend the<br />
           <span style={{ fontStyle: "italic", fontWeight: 500 }}>{PRODUCTS[rec.primary].subtitle}</span> DermaStrip
         </h2>
-        <p style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>{rec.reason}</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>{rec.reason}</p>
       </div>
 
       {PRODUCTS.map((product, i) => {
@@ -292,7 +495,7 @@ function ResultsStep({ areas, solution, braces }) {
         return (
           <div key={product.id} style={{ borderWidth: 2, borderStyle: "solid", borderColor: isPrimary ? "#C4A882" : "#EDEAE5", borderRadius: 20, padding: 0, marginBottom: 16, overflow: "hidden", background: "#FAFAF7", position: "relative", boxShadow: isPrimary ? "0 8px 32px rgba(196, 168, 130, 0.15)" : "none", animation: visible ? `fadeSlideUp 0.6s ${i * 0.15 + 0.2}s both` : "none" }}>
             {isPrimary && (
-              <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "8px 0", textAlign: "center", fontFamily: "\'DM Sans\', sans-serif", fontSize: 11, fontWeight: 700, color: "#F5F0EB", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+              <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "8px 0", textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: "#F5F0EB", letterSpacing: "0.15em", textTransform: "uppercase" }}>
                 Recommended for You
               </div>
             )}
@@ -300,32 +503,32 @@ function ResultsStep({ areas, solution, braces }) {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                 <div>
                   {!isPrimary && product.badge && (
-                    <span style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8B7355", background: "rgba(139,115,85,0.08)", padding: "4px 10px", borderRadius: 6, display: "inline-block", marginBottom: 8 }}>{product.badge}</span>
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8B7355", background: "rgba(139,115,85,0.08)", padding: "4px 10px", borderRadius: 6, display: "inline-block", marginBottom: 8 }}>{product.badge}</span>
                   )}
-                  <h3 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 22, fontWeight: 500, color: "#3D3428", margin: 0 }}>{product.name}</h3>
-                  <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#8B7355", fontWeight: 500 }}>{product.subtitle}</div>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, color: "#3D3428", margin: 0 }}>{product.name}</h3>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#8B7355", fontWeight: 500 }}>{product.subtitle}</div>
                 </div>
                 <div style={{ width: 72, height: 72, borderRadius: 14, flexShrink: 0, background: "linear-gradient(135deg, #EBE0D2 0%, #D4C8B8 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                 <StarRating rating={product.rating} />
-                <span style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, color: "#6B5D4F", fontWeight: 600 }}>{product.rating}</span>
-                <span style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 12, color: "#A89880" }}>({product.reviews.toLocaleString()} reviews)</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F", fontWeight: 600 }}>{product.rating}</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#A89880" }}>({product.reviews.toLocaleString()} reviews)</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                 {product.features.map(f => (
-                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, color: "#6B5D4F" }}>
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F" }}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#E8F5E9"/><path d="M5 8l2 2 4-4" stroke="#4CAF50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     {f}
                   </div>
                 ))}
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 16 }}>
-                <span style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 32, fontWeight: 600, color: "#3D3428" }}>{product.price}</span>
-                <span style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#B5AEA4", textDecoration: "line-through" }}>{product.comparePrice}</span>
-                <span style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 12, fontWeight: 600, color: "#C0392B", background: "rgba(192, 57, 43, 0.08)", padding: "3px 8px", borderRadius: 6 }}>SAVE {Math.round((1 - parseFloat(product.price.slice(1)) / parseFloat(product.comparePrice.slice(1))) * 100)}%</span>
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 600, color: "#3D3428" }}>{product.price}</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#B5AEA4", textDecoration: "line-through" }}>{product.comparePrice}</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: "#C0392B", background: "rgba(192, 57, 43, 0.08)", padding: "3px 8px", borderRadius: 6 }}>SAVE {Math.round((1 - parseFloat(product.price.slice(1)) / parseFloat(product.comparePrice.slice(1))) * 100)}%</span>
               </div>
-              <button style={{ width: "100%", padding: "16px 32px", fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", borderRadius: 50, cursor: "pointer", background: isPrimary ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent", color: isPrimary ? "#F5F0EB" : "#6B5D4F", border: isPrimary ? "none" : "2px solid #6B5D4F", boxShadow: isPrimary ? "0 4px 20px rgba(107, 93, 79, 0.25)" : "none", transition: "all 0.3s ease" }}
+              <button style={{ width: "100%", padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", borderRadius: 50, cursor: "pointer", background: isPrimary ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent", color: isPrimary ? "#F5F0EB" : "#6B5D4F", border: isPrimary ? "none" : "2px solid #6B5D4F", boxShadow: isPrimary ? "0 4px 20px rgba(107, 93, 79, 0.25)" : "none", transition: "all 0.3s ease" }}
               onMouseEnter={e => { e.target.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.target.style.transform = "none"; }}
               >{isPrimary ? "Add to Cart" : "View Product"}</button>
@@ -336,8 +539,8 @@ function ResultsStep({ areas, solution, braces }) {
 
       <div style={{ textAlign: "center", marginTop: 28, padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
         <div style={{ fontSize: 24, marginBottom: 8 }}>💯</div>
-        <div style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 18, fontWeight: 500, color: "#3D3428", marginBottom: 4 }}>100% Money-Back Guarantee</div>
-        <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, color: "#9A8E82", lineHeight: 1.5 }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 500, color: "#3D3428", marginBottom: 4 }}>100% Money-Back Guarantee</div>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A8E82", lineHeight: 1.5 }}>
           If you don’t see visible results, we’ll refund your purchase. No questions asked.
         </div>
       </div>
@@ -348,6 +551,7 @@ function ResultsStep({ areas, solution, braces }) {
 export default function AngelLiftQuiz() {
   const [step, setStep] = useState(STEPS.WELCOME);
   const [areas, setAreas] = useState([]);
+  const [photo, setPhoto] = useState(null);
   const [solution, setSolution] = useState(null);
   const [braces, setBraces] = useState(null);
   const [email, setEmail] = useState("");
@@ -362,11 +566,12 @@ export default function AngelLiftQuiz() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap');
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
-      <div style={{ maxWidth: 440, margin: "0 auto", minHeight: "100vh", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "\'DM Sans\', sans-serif" }}>
+      <div style={{ maxWidth: 440, margin: "0 auto", minHeight: "100vh", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
         {step > STEPS.WELCOME && step < STEPS.RESULTS && (
           <>
-            <ProgressBar step={step} total={5} />
+            <ProgressBar step={step} total={6} />
             <button onClick={() => goTo(step - 1)} style={{ position: "absolute", top: 12, left: 12, zIndex: 100, width: 40, height: 40, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.8)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="#6B5D4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
@@ -374,14 +579,15 @@ export default function AngelLiftQuiz() {
         )}
         <div ref={containerRef} style={{ height: "100vh", overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: step === STEPS.WELCOME ? "center" : "flex-start", paddingTop: step > STEPS.WELCOME && step < STEPS.RESULTS ? 48 : 0 }}>
           {step === STEPS.WELCOME && <WelcomeStep onStart={() => goTo(STEPS.AREAS)} />}
-          {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.CURRENT_SOLUTION)} />}
+          {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.PHOTO)} />}
+          {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.CURRENT_SOLUTION); }} onSkip={() => goTo(STEPS.CURRENT_SOLUTION)} />}
           {step === STEPS.CURRENT_SOLUTION && (
-            <SingleSelectStep stepNum={2}
+            <SingleSelectStep stepNum={3}
               question={<>What are you currently<br />using for <span style={{ fontStyle: "italic" }}>this issue</span>?</>}
               options={SOLUTIONS} selected={solution} onSelect={setSolution} onNext={() => goTo(STEPS.BRACES)} />
           )}
           {step === STEPS.BRACES && (
-            <SingleSelectStep stepNum={3}
+            <SingleSelectStep stepNum={4}
               question={<>Have you ever had<br /><span style={{ fontStyle: "italic" }}>braces</span>?</>}
               subtitle="This helps us determine the best fit"
               options={[
@@ -391,7 +597,7 @@ export default function AngelLiftQuiz() {
               selected={braces} onSelect={setBraces} onNext={() => goTo(STEPS.EMAIL_CAPTURE)} />
           )}
           {step === STEPS.EMAIL_CAPTURE && <EmailCaptureStep email={email} onEmailChange={setEmail} onSubmit={() => goTo(STEPS.RESULTS)} onSkip={() => goTo(STEPS.RESULTS)} />}
-          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} />}
+          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} photo={photo} />}
         </div>
       </div>
     </>
