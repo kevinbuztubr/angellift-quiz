@@ -270,10 +270,10 @@ function PhotoStep({ onPhoto, onSkip }) {
 
   const confirm = () => {
     setAnalyzing(true); setAnalysisStep(0);
-    setTimeout(() => setAnalysisStep(1), 800);
-    setTimeout(() => setAnalysisStep(2), 1600);
-    setTimeout(() => setAnalysisStep(3), 2400);
-    setTimeout(() => setAnalysisStep(4), 3200);
+    setTimeout(() => setAnalysisStep(1), 1500);
+    setTimeout(() => setAnalysisStep(2), 3000);
+    setTimeout(() => setAnalysisStep(3), 4500);
+    setTimeout(() => setAnalysisStep(4), 6000);
   };
 
   if (analyzing) {
