@@ -2,15 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const STEPS = {
-  WELCOME: 0,
-  AREAS: 1,
-  PHOTO: 2,
-  CURRENT_SOLUTION: 3,
-  BRACES: 4,
-  EMAIL_CAPTURE: 5,
-  RESULTS: 6,
-};
+const STEPS = { WELCOME: 0, AREAS: 1, PHOTO: 2, CURRENT_SOLUTION: 3, BRACES: 4, RESULTS: 5 };
 
 const IMG_ENHANCE = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEsASwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDSUsT95vzqdd395vzqOMVYRa4rnoAob+8351IFb+83504LUqrSCxGqMf4j+dSLEx7n86nVKmSMU0BAkLep/OrCQkdz+dTKmBUqrVCIliPqfzqUIR3P51IBS7aYWIzn1P50xifU/nUxGBUT0mwsQMx9T+dV3c/3j+dTSHiqznmoHYjZ2z94/nSKzZ+8fzoNCigotQsf7x/OriMcDk/nVGIc1cTpTCw8k46n86rTMf7x/OrJ6VWl70ikjNndufmP51VLtn7zfnVmcc1UPWkNliF2/vH86vROSPvH86zYzg1ehaghouozep/Opxk9z+dV0qwtUmTYXYT3P50xoie5/Op15p2Aaq4ig9uT3P51Xe3PqfzrWKVG0dDAx2tz6n86jMDep/OtdohUTRCpYzLMLerfnTTEw/ib860mj9qhaOpAolGH8TfnTCGH8TfnV1kqB1oGUpC/99vzqq7ybvvt+dXZRVRl+ai47FqKrMY4qpGelW42pjsWEWpkXmo4zU69qBWJEWp1Wo0FTqKpEjlXmpVWmqKlApiACl204ClxQBEwqvJVlqrydamQ0VpOlVH6mrUveqjnmpKGU5RSKKkVaYEsQq2gqvGtWkFNF2FI4qrMOtXCvFVpl4oYGZOtUmHNaEw5qlKOakGNQ81dhNUQcGrcB6UBY0YjxVlarRCrijihEMco4qQUiingVSJYhFIRTqDTuIhZaiZasMKjYUhlZlqFlxVlhUTCpGVXFV3FWpKqyGkykinL3qoetWpTVRz81A7D4jVuM1QhNXYzTHYuxmrKVUjNWYzTBotpU61WSrKGmiGiZalUVGlTLTRLFApSKcBSEUxETiq0g5q01VpetSxoozHrVJ2+Y1auD1rPZiSaksnU1Yj5qpH1FXIhTGizGOKnXrUcYqUKaBjz0qvKOKnwail6UxmbMKoSjrWjOOtUJakRVzzV23PSqLcGrdq2TSBGtD2q6gyKqQdBV1BxTJY9BzUmKYvWpQOKZLGEU08VIRTSKYiM1G1Smom9aQ0QmoXNTOetV5DikUkQSGqkhqxIaqStUlIrSmqbN81TStVJ3+Y0ASwmrsZrOhbpV6I9KoZeiNW46pxGrcfagC2lWEqtGaspTEyxHU61AlTCqM2SUhozxSE0yRrVUmPWrDtiqVw/BqWVEzrl+tUs81YuCS1VJmCCki2TI4zV6BgcVhifB61at7wBsZoGdHDzV+OFSOaxra5Bxg1pJc/LVRsKVyw8KgVQmGM1Ya5JqhcTjmhhFMqXBxmsyVxmpbq6HPNZMt0N3WoKsW87jU1udris+GcE9avIR1oFszdtmyBV9OlY1pL0rXhfIoQmidRUoFRqQakBpkAaiapTUTUARtULmpGPNQtQWkRtVeQ1M5xVaRqljK8h61SmbrVqVqoTN1zSGVJm61SdvmqxOw9Kz3kwxoCxagar8TZrJt3GBWjC3SqA04jVyM1nxNV2NqALqGrSGqUbVaQ0xFpDg1KGqupqQNxTIaJt1NZ6j3U1moFYR3qlKSTVljzUTRkg8Ui9jLmIBNZd1NzWhfZjzmudvLjrzzQCV2NlucHrSR3ZDDmsC+1JLckuwpLHVYbo/K4NFhtpHc2V9wBmtmK8yOtcTbXIGOa1I73A60hnSveDHWs27vgAcGsuTUODzWXdX+QfmoAsXl/knmsxros3Ws+6vQuWZqy/7cgEm0OM0JNg5I6+3uMY5rXtp9wHNchZ3YlUMD1rbtJ+QM0AdXaknpWpC5GKzNN+eMHFairgZoAuRvkVMGqkj7asK+aZDRPu4qJj1ozTGagSQxjzUbHinE1DI1Isic9aqyNU0jVUlfrUjIJWrPmerUrdaz5396TKSKk79azZJPnNWbmTFZckvzmmDLttJkCtSB+lYFtJgite3kqmQjZiarcbYxWZC/Srsb0irGlG9WY3xWcj4xVlHpiNBHqUMKpo9SiSi4rE+6mlqj3U5eTimKw5F3NVhYxjFNjXmpugpohs57XICIiwrhL1zlq9OvoBNCy+tef6tpk9vKzKu5aTLps4m/spLpyeorKFpcWM4liz7j1rtkRd2GXH1pZLKKQfdFNSsVJJmdY35lhB6N3FXhenHWqrWJimHlIWJ7KMmp/7I1RxuTTb1l9Rbv8A4UbivYR70881TmusKWJ4FSzadfQ8zWV1GP8AbhYf0rOmQyt5Y7daVh77GPfyT3jlVJCe3em2uknqRXRQacMAlateSsa8Cnzi5FcpWETQDaelbtox3Cs9I3dsIhNbml6bKXDOKi5bVjsNHH7hc1rY4yKoWEflxAVoimR1GdKer4prjHIqPdQG5Y8yml6h30jSUXCxI7Yqs70jSc1BJJSGDvVSV+tOkk4qpLJSY0RSv1rOnk61PNJ1rNuZeKkopXUuM81kyTfOas3U3WsiSb5zVpENmtE+1q1LeTpzWOcg5q3by9Kpkxeh0EMnSr0UlY1vLxWhFJUXKuaaSVYR6zkkqdJOKYGkkmKkEtUFfNSLJQBdSTNW4QWOegqlbIZGz2rSQbeKZLZKpxTsmoxTs8UybA3IqjdWayg5Aq9jOMVtWWkxxx/aL7AUchG6D6/4VUYuWxMpqC1OMg8Gzao2Y4lSPP8ArX4H4etbcHgzw1okYm1OUTN/02bC/go6/rWnf625BishsUcbyOfwHauXuoGnkZ5GZ3PVmOTVXjHbUj357uyNeTxjommLs0/T3YDgeVEsa/rz+lZF18UriFj5eiAr/tXPP6LWbLZYzxWfcWSt1FJ1ZFKhTN+3+LgZgtxokijuY7gH9CBWgNd8FeIht1Cwjikb+K4gCn/vtf8AGuDGnKGzj9KtLaAAYWl7WQ3Qh00Oq1D4bWN3B9o0K9AVhlUkbeh+jDkfrXE3fhu80668m+t2iftnkN9D0NbWnT3ulz+bZTvEc8gH5W+o6Gu5sNbs9dgFlqsEayN0z91j7H+E07Rn5MV6lPfVHnNppaDB21s29mqdq29T8PPpkm+LMlsTwx6r7H/GqqoBWbi07M1jJSV0EaBRUwNNxiikJjsjFQSfKc9qk3DNMcg8UAiEvUbSYpJDg4qs7kZpFD3kqB5KY8lQPJRcaQ55KqSydaJJapyy1JRHPJ1rJuZutWZ5sA1kXUvWmkDZTupc5rOZsmp5m3E1DitEZSZuuvFNjba1WSvFVnXDU2TF2NKCbkVoxS8VhwOcgVowvUM1NaOSrCyY71mxvU6yUhGgsvpVu1Qytk/dqhaoZXyfuiteMhVAHSgGX4iAABVhWqij4xVlWyKoTLKtTt3BqBWwa1NHsvtl1ucZij5b3PYVUU27ESkoq7L+lWKW8P266wMDKg/wj1+tU77UHvZMDKxD7q/1NP1nUPPn8iNv3UZ5x/EazgeKuUre6jKMW/fkKRTGjBBp+4E80Z56ioNCs1upHpVGWzBOR1rXYDHbpxULKM9BQ0NGMbPnp+VSLZYGcCtUJntgU4RgUrFcxmC0weR0qVLcDtVxlHYU3gUgvc29H1TcgsrwhkI2qzc/gaq6pppsJtyAmBz8p9Pas8dK6LTrhNTsXsrk5kUcHuR2P1Fap865XuYSXI+ZbdTm2xmmMaluYntp3hkGGU4P+NVWYVkzo0auKWqNmppeomkpDsEhyKpyN2qdn4qpMe4NSxohkNVnbFSyPVWV+KQyKWSqM0lTSvVCd+tNDK1xL1rJnfJNXLh+KoOMmqJZARmkK+1TbaQjmquQ0dBt4qF0qyBxSMvFNkIqIuDV+HmqwTmrluvSpZomWV4qRSSQO5pyRk05VxKDjpUjNK3IjQAVbSXtWasg61Ksw9aYjVSTpzVqOQVjxy56GrMch9aYjVV811bn+x9CVBxPJ/6Eev5CuZ0GH7Xq0EZ5UHe30HNaPiS9EmpeQD8sK4/E8n+laR92LkYz96aiUwfel3fpVJruNBlpFH1NU5ddtIusm4+1QdCg2bO/3pwyRXKzeK0U4jQfU1UPi24JyGH0FF0X7GR2khKioxKO9czb+MGJAmjV8+vWtOHXtPuBk5jPfPIp6C9m1ujVE3NODFqzpNY06EFvNz+NZt14wijBW3j+jGh2BU29kdKwO3NQk1xJ8WXDNndVmHxWxPzqD9aV0V7GSOsJI4xUlrdvaXSTIfunkeo7isCLxHayY3cVcTULeX7koJ9DSuQ4dGjqvEcCy28OoRcqQAxHoehrlXfH5V1mjuupaDcWROWTKr9Dyv61x0pwSDwehq6mtpdzClpeD6CPJgVXabHWmSSEVTklrJmxaab3qJ5BjrVU3A6ZpjTg96Q7iyPhvrUD80yWX3p6/MuakCrKOKzbg9a1pl4rKuByaaAypck1Fsq06/NTNtWIg21Gw5q0VqBx81MTN+MZFKVpLc5QVMRzTZmiuV5q1bcHFRsvpUkPDCkUjViTIomTYQTUlqQQKs3FuZIcjkipKuZL3AWohd5YfNUN0kik8E1jXM8sHzAE+2KaA62CcEDmra3CqMkiuEi17avU5HY1Dc+InIwHNVYIxPcPAbpcXV7MCCIkVc+mST/SvPdY8Wtc39zLG/DyMRj0zxXQfC69Y+BfEeoE5ZGkOf8Adhz/AFrxmK5ZwNzYOB1q5J8qQqXL7STZ08urzTsfmJ/GohcTSDOT+dZSSDAJYn+hqeOZGbaX2t6kcVnY7FI00J3YfP0qwqxFCVkXgchsj8jWaLx4lHmBHT06ipPPidcxlkOMlWOR+dA7tl4iMDO4euKRZVTAEvB9Oaz/ALWAArqCvQEjp+NMN4AxALYPvQNGq75Une59eOlRrGJCR8zEeh6fpWd9sXbzgkd85pqXuGJ6d+nFAzW2IqhjECOnzEn9BUbkZ+WM59gBj9aoSagCerHuATgfpVaS+Z+Nq469Bigk0TOwPB5HbrThqkkZ+8c1jS3xKgZxgcYOKrNdZGCx+vrRYTkev/DDxA03iOSxd8rNAxUZ7qQf5Zqv4g1dNP8AE2oWUgx5cxx9DyP51x/w3uzD8RNHwxO+R4z+KNVn4uytafEO6K8CSCF/x24/pWvLeByOyrO/VG1/aUMy5VgarTXK/wB6vOI9XljOQ5q0NfkZfmbms+Vjduh2Ml4o71Gl4GPBrlY7y4mbO1gDWxYwyyEE5qWrCNcN5h4rWjhIiBPpVSxsyZEB9a3JYgqcDpUDuYtwMZrHuBya2rvvWPN1NCGUXX5qaVwKnK80xlqhFdhxVZ/vVddcCqMjYc1SEzZsH3wL9KvAVh6HcCS1Q5zxW6vSqkrMzg7oaRTY+GxUxWoyuG4pFGrZv0rZiwyYrnLWTDCt22l4FQxkdzZqSSF61lXGnRsDlBXSHDLVWWNSDxQCOJvvDttcKSF2t6rwa5TUPDt5bMTHIWX3r025gKtuWs64CuMMKtSaLSTN34XRSr8JPE8Lr+9LXGB65gGK8ZggvXVcWz8gV9CfDJI5dL1mxBGHKtj/AHlKn+VeVhfJleF1CshK4/HFbSl7qZFGH7ySOdi0/Un6Q4+pq0NK1HHKpj610kThj0HpV6NFY47Vlc61TSONOn6ig/1YI9jTPs99GcmF8fnXeJbB+i5p32DJ+7z6UFJI4L9+OGjcfhTGWd/4H/Ku9bTuMlKiOnr/AHP0pDtc4hYrgjAikz9KQQ3I/wCWD13C2K4GFHPtThYrwdn6UBY4j7HeS9IiO3zU8aLfv1ZBXerpjDjZimtaBCeOc4p6k2T6nCHw9dDnzl+u2oZNEvY1JV1J+hFdvOFxxgVQlkVefSjmD2aM/wCH9neR/EXQg8R2i5ySDxgK1XPjX5r/ABEmEaEhbSEZ/An+tdF8OYhc+ObRsZEKSSnHb5cfzYVj/EqY6h8QNSWMZWMpET/uoP65rRS9y5xzh++t5Hmkdpcytg/L9K2tO0X5g0mSfetGG1SMAAZNbVjaFsEjiocynFIbZ6WrEYXit63sliA4xUttbhF6VcCjtWL1YiWztxvLY6CpLo4U1LEBHEPeqN3LwRSYIyrxuTWVJyavXLZJqiwyc0IogxzTSKnIqJqoRXmwBWPPLiUitS5bCmucupwJzzVwVzObsS+Fb7dEqE8iu3iYMoNeTeH7swXgXPBr02xnDxqc1rVWpjSehp9aay06M5WnFc1ibDIzgitW1m4AzWXtxViBtppMpG+j5FNk55qtDJlaeXzQAkiBxWVeWuQSBWpu5prqGGMUD2J/htetZ+K2tJOFuoWVc92X5h+mawvGmmfYfFOoQgbcyGVP91/m/qRVuMtYajbX0Q+e3lWQD1weR+Wa6L4o2K3Fjp/iG1+aIqIpGH91uUP55H41qtYegoy5ayb6nmCzGNhkdRz9RV6C6xnmqnyTKRn5uoNMw0cnJwffp/8AqrM7kzorK+2EjjBGK0or1N5YgEqGwCfXmuWibdwQ2QO3NaMMiqc722nvnI/TpVJg0joRdQGAZGDwBx+dP32hdMgEbecdz0rDhlVoSAxJwQdrZOKRZSEXJJH0zj+VVzE8pswzQxqvy/c359uR/So2mQWmAp4RlyPY5rIEpBfBXq3GPamtO2wqDEfl7t0/+vSuPlN9rpPmLZwQCM8e3+FYtxeh7gsHHqcd6pSzuQScdRgsQKoSykAlnxz2/wAalu41FIlurxVzkj8TWTNds4wq5J6dqe4Zz8q4J4y1AhCnL/Me3rSBvsekfB6x2S6rrExIjjRYVdhgf3nP6LXAaleC/wBUvLwD5rmd5SfXJJr1LVM+DfhSll92/vV2MB1Dvy/5Lx+VeV2tozvk1pPRKJw05XlKfcksrUyuCa6W1twiDiobK2WNRxV8HHFYtlbkqgAYqaIbiKgBzViM7VzSuFiaV9q1lXL5zVqZyazpjnNIexQmO5qgIqw45qFuaaERMMCoJDip36VSnfANNAUL6YBDXIXM5a4Yg1t6tc7UbmucX5wWPc10U46HLWlrYy4pDFKrr2Neh6DqAmgXnmvOgM1t6HfG2nCk8GtZq6MoSsz1W3cECrXasXT7oSICDWxG2VrlaOtajsVIgwaaBUqjmpKLMTYFTE1BGMVLQMXd+FKDTSKBmgYOu4YxXYeF5LfWtAu/Dt98y7CEz12H091P9K5GpbS6m0+8iu7c4kjbIz0PqD7GqhLlZFSHMjkNZ0W60PU57OcfNE2M9mHYj2IqnHc8bX5A7GvavEGkW3jLQ49RsVH2yNcBT1Pqh9/T/wCvXkF1pu12QqyOpIII5B9DTnHlZdGu2rPcZFsOArYxyMnp9DVyORlzn5m7uvX8R3rGaOaAk9RQL4r97P41J1RkmbGecK2Oc424pUZh8qhcDvvxmsoapgY3cU46mCOaLlXRqDeCx4znP3s44qNmPKnkcdCec1mHUF9ffk0w6gOxFA7o0CpPU/8AfPX/AOtUDqinLYz65yTVNr2R+ASee1M2zSnnIFFyHNInluVH3Rk+prrfhx4bfXdfW9uYz9hsWEjZHDydVX+p+g9axNB8OXOt6lHZ2qFnblnPSNe7H2r1PXby18G+G4tB0k4upUILj7yg/ec/7R7f/Wq4L7T2OSvWb9yO7OS8e6x/b3iExQtutLPMUZHRmz8zfmMfhWTa2wXHFOt7XHJFX0QAdKylLmdxRjyqyBRtXApVGTTtvGKci81JY9BzUpOKYOKCaAI5W4qlL3q3KeKpyUCZVcVXYYqzJxk1VlbFMCtM+B1rJvJwqk5q3cygA81zOrXwRGGeauCuyZysjH1e83uVBqGAfuhWdJIZZsn1rVgX90K67WRwt3dzHAqdMrhh1FR45qwAMCquSdZoOp5VVY8iu1tJw6jmvI7S4NtOCD3rvtH1ASxr81YVI9TopTvodYhqdOtUoJAw61cSsTpLKjpUo6VEnSpRSAMUYpacAKAQ0CnbM8U7FPVc0FF3RNXn0W88xPnhfAliz94eo966DXfDVn4ptRqelSIt0RyDwJPZvRveuV8rPIq7p1/d6VP5tq+AfvIfut9RWkZ6WexlOnd80dzkbzS5rWd4LmFopU4ZHGCKzJtOz/D+le1rd6N4ngWC/hWO4AwAxwQf9lv6Viaj8P54yWsZVnT+4/ysP6H9KbpveOoo1ltLRnkj6Vn+Go/7IJPSu9udAvbUkTWkye5Q4/Oqv2AjqtZO6NlK+xx66P7VKuk4/hFdaums5wqFj7c1o2nhTUrogRWbgH+J/lH60JSewnJLdnDrpuO35VtaJ4UvdauhHaxYjH35m+4n/wBf2Fehaf4CtbcefqtwrqvJjQ7V/Fuv8qs6h4ihsbcWWiwIoXgSBcIv0Hf61oqdtZmLq82kNSNm0vwHpP2WzUTX8oyc/ec/3m9FHYf/AK64GYzXt3JdXLtLNKdzMfWtOSCS4meWZ2kkY5ZmOSTSi1wOlROTlp0Lp01HV6soLFjHFPCYHSrjRAdqjKCosaFfZ+dOC4FSMMCmGkAlIaXNMJoAifmq0tTuaqyvTEytK2KzLqYAHmrVzJgHmsG+uQoPNNIHoU9QvAisc1xeo3ZnlIB4FXtX1AsSinrWESTXXThY46s7uwJ/rB9a3YB+6FYSffH1rft/9SKuRkjJZcCnqeKV14qLoaCQkODkVsaJqRhmCMeKxX6UxHMbhlPIotdFJ2dz1/T7sSIuD1rahkBArzvw/qDPGua7O0ugwHNcso2Z2wldG7G3FTg1nxS8VZVwakssg08VArVMlICUCpEXmmIM1Mowc0DRPGgNSrED2pIutWVHSmNjFtQ3YVq2V7eWYCx3DMn9yT5hVVF4qVetUnbYzkk9zdi19zxJbg+6tj+dS/2taOcvbEn1KqaxFOQKceh45rRVJGXsYm1/bFtGP3duw/ACqs+vTniKJE9z8xrNNXBpF26hlRMEZHz0c8nsHs6cdzPurie6OZpWfuATwPwqm0XPQ9e9XZ4Ht5mikADr1AqB+BWb31NopW0KpjA+tQuorTv7N7J41dlYugcY96zZDUtW0KVmroqSDrURFSyGoWbFSMieoz0pXfmoXk4pAKzVEz4FMeUVA8tACySVRnmxT5phisq7uQAeaEhFe9usA81yOsajtUgGr2p6hsB5rjbu4aeUk5xXRThfU561S2iIJJDI5Y9TTat2Ok6jqUV1LZWVxcRWsZluHijLLEgz8zHsOD+VVK6TlFH3hW5bOPIXmsQDmtS3kxCBUsEQycCq5PNTSnioO9IQNyKhzzUx6VCRzVIZ1fhwfuxXWRM0RBHSuZ8PR4iWurRQyYNc89zqp7Ghb3QYDmtCObIHNc5loWyOlXra7BxzWbNUzfjkzVqNs1kRTZ71fhkyKRRoIcVOp5qmj8VYRqRRdiPNW0bis5Hwaso/FMDRVulPB5zVSOWpw9MmxaQ8U8tVVXxTvM5607isSs2Aa276K2kW3M935BEQwNuc1zxfI61rTX+mXKxeelwWRAvy4A/nVxasyKid00JYw2zi+Mg81IlyrdyOenpTLv7Pc6M10lskLxybMKeo/wAmokvrS3W9SJZRHNGFjzyQcd6qG/iGiy2hDea8ocHHGOP8KLq1hcrvf0Nm+uLWO8so5rVZ2ljRSXPCgnHA9azGtYYNduoEsHu9ozFEDwCcHn25qC/1SC4vrOdA4WFUDZHJwcnFSDXbNtQ1AyrMLa7QLuTAdcDFDkmyVGSWnYTXbKKOysrn7LFbzPLskjibK/p9KtXC6TbeI00waXE4nwGc/wAORxtH4frWVe6rpkmkJZxRXCtbyhoSxB3DPJb35PH0qte69ay+K4dUVZfs6FSQQN3AI6Zocop/cCjJqz8/+AT2unWNk+tXt1D9oh0+QxxwseGOeM/pWcZdM8Q6nptpbWP2KeWUrP5R+Qr1498D/wDXTofEtkl/qsd5BLLpuoOWYLw6c8H/AD6CszUPEOk6fPpz6FZuGtJTM09x9+TPVeO2P/rVN1byKtK/n/wDsZNBguZruxk0K3tLNY2FveLMpk3DoSM559/xrm4ptJ0vwLYaxdaXFeXLXDxgMdoblvveoAHA+lZ2qeIvBk5vNQXTL6XULlG/cSPiJHPVsg+vPH6VgX/iW1ufAdhoiLN9rt7h5XYqNhB3Ywc5z8w7VTaIjGXU9Avx4e07xRpdkNChmOrqjN5jfLCG4G1cevJrE0jwnZz+JfFDmx+3w6U+y1sXkCrK7AlQzE9B05rG1bxnp154r8PanFHci306OFJgyAMSrEnaM81Xi8d6ZF4k8RNfWc9zoWtnE0QwsqDGAwGevJ7+npTvFsVpJEnj7wvbnwnp+s3Wg2mi6ouox281tazK8c0THg4U4z+vX2rQv7bwPpfxYh8Hr4MspxqAQTXDniEsh2iNMcDjJIIOWPpXn/inU/BcVtY23hvTL7zIroTz31437wqCPkABwRxnnGMe5p+r/ELSL340Wfi+KG8GnQtEWRo1EvyoVOBux1963ic87nZeBptM8O2XxI0hNFt7mPSROWeVjuuogXCxPx0AXr7mvEdc1G11bWri+s9Ng023lK7LSA5SPCgHH1IJ/Gu98PfELQ7Txj4vm1S0vJND8R+ar+UAJo1ZmI4z6Mc4PBx1rhfELaI2u3B8PJdppfyiEXePM+6NxOPU5P40yUZpFW4XPliq1Kr7RipKJ5DzUR61LLUHegQppmMuPrTjSwjdMo96Y0dpoK4iWuoiXiue0aPCLXSRD5a5p7nVDYbJFkc1UdWiORWkRxUMiBgagsbbXfYmta3uRgc1zsiGNsipre7KnBNBSZ1sUuQKtpJxXP214DjmtGOfIqTQ1FkqxHLWWk2e9TpJz1oA1UlqwsvHWstJsd6mWamBpCXijzOetUllzT/NFAFrzcd6TzaqmQUwygd6Bll5uOtV3mqB5qgeb3pXAneaoHm96rvNzUEkwxSETySiqc0/HWoJbjGeazbi7AB5oETXFwBnmsi6ueDzUF1fHnmsuW4Zz1ppCbsSyz5PWoi+aiGT1p4FUSKTmqk/Q1axVeboaaEzDvV4NYj/AHjW/e9DWDJ94/WumByVBoFOHXnpQKBVmY8e1BWgGnfjUjRLJ6VAeKnk61CwoQCHpU1mu65WoKuaau65zQwW53Wkp+7Wt+IcVj6WuEWtyNeK5pbnXHYdt4qN1qwBTXXipGZ8yZFZ0qlDkVsyJxWfPHnNAEMF2UIBNbNtfAgDNc3KpVjSw3RQ9aC0ztIrnjg1YS4965WDUOOTV2O+z3pFpnSpP71Mk/TmueS8HrU6XoPekM6FZven+d71hpejHWpPtnHWgZrGeo2uPespr0etQPfD1pAarXA9aryXXvWS98PWqz3vvQDNV7r3qrLeADrWXJe+9UZr3rg0WJNC4vfesm5vc55qnPdk96oPOXNaKJMpFl5y7daFGetQxLk1bjX2pvQncVVqTbTlWnbagoiIqrN0NXGFVJxwaaEzEvO9YUn3zW9ejg1hSf6w11QOSpuIKUUgpwHNUZhThgig9KbSKLL1A9dfL4essdZf++v/AK1Z82iWq9Gl/wC+h/hTSJuc9WnpCZlB96SbT4k6M/5j/Cr2kxKjADNKWw47nY6auEFbcQ4FZFgMIK2YulczOpbD8UEU8dKMVIyu6VTmj61osOKqzCgDFuErPkUg8VsXAHNZ0qjNBVisrspqdLhh3qIgUmKYF5bwjvU63pHesrvTgT60iuY2Fv8AHen/ANoH1rF3Gl3H1osHMa5vye9RNek96zdx9aTcaQ7l5ro+tQtcn1qsScUxjQF2SSXBNVZJSacetQvVIhshck9aRFyaVqkjHNWIsRJVpFqOIcVZQcVmy0gApcUopcVIyJxxVKbvV56pTdDVImRi3g4NYUo/eGt+76GsKX/WGuiByVCPFPUYpB1p46VZCQjUynHrSUwP/9k=";
 const IMG_MARIONETTE = "data:image/jpeg;base64,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";
@@ -31,20 +23,91 @@ const SOLUTIONS = [
   { id: "nothing", label: "Nothing yet", icon: "🤷‍♀️", detail: "Looking for my first solution" },
 ];
 
-const PRODUCTS = [
-  {
-    id: "original", name: "AngelLift® DermaStrips", subtitle: "Original",
-    price: "$49.95", comparePrice: "$69.95", rating: 4.8, reviews: 2847,
-    badge: "Best Seller",
-    features: ["30-day supply", "Visible results in days", "Hypoallergenic & non-toxic"],
+const PRODUCTS = {
+  original: {
+    id: "original", name: "AngelLift® Original DermaStrips", subtitle: "Original",
+    price: "$79.99", liftForce: "0.024N", slug: "starter",
+    image: "https://angellift.com/cdn/shop/files/Untitled_design_f2c2c35e-916b-4ad5-a1ac-e770547962f1_300x300.png?v=1774594386",
+    tagline: "Gentle start to anti-aging care",
+    features: ["Gentle lift for sensitive gums", "Ideal for fine lines & prevention", "Surgical-grade hydrogel", "Reusable — lasts 4–6 months"],
+    bestFor: "fine lines, first-time users, sensitive gums",
   },
-  {
-    id: "advanced", name: "AngelLift® DermaStrips", subtitle: "Advanced",
-    price: "$59.95", comparePrice: "$79.95", rating: 4.9, reviews: 1203,
-    badge: "Premium",
-    features: ["60-day supply", "Enhanced comfort fit", "Maximum correction"],
+  collagen: {
+    id: "collagen", name: "AngelLift® Collagen DermaStrips", subtitle: "Collagen",
+    price: "$99.00", liftForce: "0.024N", slug: "angellift-basic-collection",
+    image: "https://angellift.com/cdn/shop/files/Untitled_design_2_300x300.png?v=1774594385",
+    tagline: "Enhanced collagen regeneration formula",
+    features: ["Promotes active collagen regeneration", "Smooths lip lines & nasolabial folds", "Medical-grade hydrogel", "Reusable — lasts 4–6 months"],
+    bestFor: "collagen boosting, moderate lines, stepping up from topicals",
   },
-];
+  vermilion: {
+    id: "vermilion", name: "AngelLift® Vermilion DermaStrips", subtitle: "Vermilion",
+    price: "$129.99", liftForce: "0.39N", slug: "vermilion-vital-kit",
+    image: "https://angellift.com/cdn/shop/files/Untitled_design_3_119b50d8-2327-47c6-bdb9-a1ea19fe3d04_300x300.png?v=1774594385",
+    tagline: "Targeted lip volume & vertical lift",
+    features: ["Vertical lip lift technology", "Restores lip volume & definition", "Plumps thinning lips naturally", "Includes reshaping storage case"],
+    bestFor: "lip enhancement, volume loss, thinning lips",
+  },
+  professional: {
+    id: "professional", name: "AngelLift® Professional DermaStrips", subtitle: "Professional",
+    price: "$159.99", liftForce: "0.52N", slug: "angellift-essentials-kit",
+    image: "https://angellift.com/cdn/shop/files/Untitled_design_1_300x300.png?v=1774594385",
+    tagline: "Maximum correction for deeper lines",
+    features: ["30% stronger lift than Original", "Professional-grade correction", "Targets deep wrinkles & folds", "Reusable — lasts 4–6 months"],
+    bestFor: "deep lines, marionette lines, experienced users, filler alternative",
+  },
+};
+
+function getRecommendations(areas, solution, braces) {
+  let primary, secondary, reason;
+
+  const hasLip = areas.includes("lip");
+  const hasMarionette = areas.includes("marionette");
+  const hasNasolabial = areas.includes("nasolabial");
+  const hasPerioral = areas.includes("perioral");
+  const multiArea = areas.length >= 2;
+  const usesInjections = solution === "injections";
+  const usesTape = solution === "tape";
+  const hadBraces = braces === "yes";
+
+  if (hasLip && areas.length === 1 && !hadBraces && !usesInjections) {
+    primary = PRODUCTS.vermilion;
+    secondary = PRODUCTS.professional;
+    reason = "For lip enhancement, our Vermilion DermaStrips deliver a targeted vertical lift to naturally restore volume and definition. For even stronger results, many customers pair them with our Professional strips.";
+  } else if (usesInjections) {
+    primary = PRODUCTS.professional;
+    secondary = PRODUCTS.vermilion;
+    reason = "You’re spending thousands on injections that fade in months. Our Professional DermaStrips deliver the strongest lift at 0.52N — clinically proven to smooth deep lines permanently, without needles, for a fraction of the cost.";
+  } else if (hadBraces) {
+    primary = PRODUCTS.professional;
+    secondary = PRODUCTS.collagen;
+    reason = "Braces can accelerate gum recession, which contributes to volume loss around the mouth. Our Professional DermaStrips deliver the strongest sub-dermal pressure to restore what’s been lost over time.";
+  } else if (multiArea) {
+    primary = PRODUCTS.professional;
+    secondary = PRODUCTS.collagen;
+    reason = "You’re treating multiple areas, which means you’ll benefit from our strongest lift. The Professional DermaStrips deliver 30% more correction — ideal for comprehensive lower-face treatment.";
+  } else if (hasMarionette || hasNasolabial) {
+    primary = PRODUCTS.professional;
+    secondary = PRODUCTS.collagen;
+    reason = "Deeper lines like these respond best to stronger, sustained pressure. Our Professional DermaStrips are specifically designed for this level of correction — results you’d normally only get from a dermatologist.";
+  } else if (hasPerioral && areas.length === 1) {
+    if (usesTape) {
+      primary = PRODUCTS.professional;
+      secondary = PRODUCTS.collagen;
+      reason = "Face tape provides temporary surface tension, but doesn’t address the root cause. Our Professional DermaStrips work from beneath the skin to stimulate collagen and deliver lasting results.";
+    } else {
+      primary = PRODUCTS.collagen;
+      secondary = PRODUCTS.professional;
+      reason = "For fine peri-oral lines, our Collagen DermaStrips promote active regeneration while providing a gentle lift. For faster, more dramatic results, consider our Professional line.";
+    }
+  } else {
+    primary = PRODUCTS.professional;
+    secondary = PRODUCTS.original;
+    reason = "Based on your profile, our Professional DermaStrips are your best path to visible results. With the strongest lift in our lineup, 92% of users see improvement in just 30 days.";
+  }
+
+  return { primary, secondary, reason };
+}
 
 function ProgressBar({ step, total }) {
   const pct = ((step) / (total - 1)) * 100;
@@ -57,8 +120,8 @@ function ProgressBar({ step, total }) {
 
 function StepIndicator({ current, total }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#9A8E82", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-      <span style={{ color: "#6B5D4F", fontWeight: 600 }}>{current}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A8E82", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+      <span style={{ color: "#3D3428", fontWeight: 600 }}>{current}</span>
       <span>/</span>
       <span>{total}</span>
     </div>
@@ -77,35 +140,29 @@ function WelcomeStep({ onStart }) {
       transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
       <div style={{ width: 80, height: 1, background: "linear-gradient(90deg, transparent, #C4A882, transparent)", marginBottom: 32 }} />
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#C4A882", marginBottom: 20 }}>
-        AngelLift®
-      </div>
-      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 42px)", fontWeight: 300, color: "#3D3428", lineHeight: 1.2, marginBottom: 16, maxWidth: 440 }}>
-        Discover Your Perfect<br />
-        <span style={{ fontStyle: "italic", fontWeight: 500, color: "#6B5D4F" }}>DermaStrip</span>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#C4A882", marginBottom: 20 }}>AngelLift®</div>
+      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(32px, 7vw, 48px)", fontWeight: 300, color: "#1A1612", lineHeight: 1.2, marginBottom: 16, maxWidth: 440 }}>
+        Discover Your Perfect<br /><span style={{ fontStyle: "italic", fontWeight: 500, color: "#3D3428" }}>DermaStrip</span>
       </h1>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#8A7E72", lineHeight: 1.7, maxWidth: 360, marginBottom: 8 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, color: "#4A4340", lineHeight: 1.7, maxWidth: 360, marginBottom: 8 }}>
         Take our 60-second quiz to find the right solution for your unique needs.
       </p>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 40, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#A89880" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 40, fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B5D4F" }}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 11.8 3.8 14l.8-4.7L1.2 6l4.7-.7L8 1z" fill="#C4A882"/></svg>
         100% Money-Back Guarantee
       </div>
       <button onClick={onStart} style={{
-        fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-        letterSpacing: "0.15em", textTransform: "uppercase",
+        fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase",
         padding: "18px 52px", border: "none", borderRadius: 50,
-        background: "linear-gradient(135deg, #6B5D4F 0%, #8B7355 50%, #6B5D4F 100%)",
-        color: "#F5F0EB", cursor: "pointer",
-        boxShadow: "0 4px 24px rgba(107, 93, 79, 0.3), 0 1px 3px rgba(107, 93, 79, 0.2)",
-        transition: "all 0.3s ease",
+        background: "linear-gradient(135deg, #6B5D4F 0%, #8B7355 50%, #6B5D4F 100%)", color: "#F5F0EB", cursor: "pointer",
+        boxShadow: "0 4px 24px rgba(107, 93, 79, 0.3), 0 1px 3px rgba(107, 93, 79, 0.2)", transition: "all 0.3s ease",
       }}
       onMouseEnter={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 32px rgba(107, 93, 79, 0.35)"; }}
       onMouseLeave={e => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 4px 24px rgba(107, 93, 79, 0.3)"; }}
       >Start Quiz</button>
-      <div style={{ display: "flex", gap: 24, marginTop: 40, opacity: 0.5 }}>
+      <div style={{ display: "flex", gap: 24, marginTop: 40, opacity: 0.6 }}>
         {["🌿 Clean", "🇺🇸 Made in USA", "💯 Guaranteed"].map(t => (
-          <span key={t} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#8A7E72", letterSpacing: "0.05em" }}>{t}</span>
+          <span key={t} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4340", letterSpacing: "0.05em" }}>{t}</span>
         ))}
       </div>
     </div>
@@ -115,31 +172,27 @@ function WelcomeStep({ onStart }) {
 function AreasStep({ selected, onToggle, onNext }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
-
   return (
     <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <StepIndicator current={1} total={4} />
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 8px" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 38px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.3, margin: "16px 0 8px" }}>
         Which areas would you<br />like to <span style={{ fontStyle: "italic" }}>correct</span>?
       </h2>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", marginBottom: 24 }}>Select all that apply</p>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", marginBottom: 24 }}>Select all that apply</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {AREAS.map((area, i) => {
           const isSelected = selected.includes(area.id);
           return (
             <button key={area.id} onClick={() => onToggle(area.id)} style={{
               position: "relative", overflow: "hidden", borderRadius: 16, cursor: "pointer",
-              border: isSelected ? "3px solid #8B7355" : "3px solid transparent",
-              padding: 0, background: "none", aspectRatio: "1",
+              border: isSelected ? "3px solid #8B7355" : "3px solid transparent", padding: 0, background: "none", aspectRatio: "1",
               transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
               transform: isSelected ? "scale(1.03)" : "scale(1)",
               boxShadow: isSelected ? "0 6px 24px rgba(139, 115, 85, 0.25)" : "0 2px 8px rgba(0,0,0,0.08)",
               animation: visible ? `fadeSlideUp 0.5s ${i * 0.1}s both` : "none",
             }}>
               <img src={area.img} alt={area.label} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", borderRadius: 13 }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 12px 12px", background: "linear-gradient(transparent, rgba(0,0,0,0.5))", borderRadius: "0 0 13px 13px" }}>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>{area.label}</div>
-              </div>
+
               <div style={{ position: "absolute", top: 10, right: 10, width: 26, height: 26, borderRadius: "50%", border: isSelected ? "none" : "2px solid rgba(255,255,255,0.7)", background: isSelected ? "#6B5D4F" : "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s ease", boxShadow: "0 2px 6px rgba(0,0,0,0.15)" }}>
                 {isSelected && <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
               </div>
@@ -148,13 +201,11 @@ function AreasStep({ selected, onToggle, onNext }) {
         })}
       </div>
       <button onClick={onNext} disabled={selected.length === 0} style={{
-        width: "100%", marginTop: 24, padding: "16px 32px",
-        fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-        letterSpacing: "0.1em", textTransform: "uppercase",
-        border: "none", borderRadius: 50, cursor: selected.length > 0 ? "pointer" : "default",
+        width: "100%", marginTop: 24, padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+        letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50,
+        cursor: selected.length > 0 ? "pointer" : "default",
         background: selected.length > 0 ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "#E5E1DB",
-        color: selected.length > 0 ? "#F5F0EB" : "#B5AEA4",
-        transition: "all 0.4s ease",
+        color: selected.length > 0 ? "#F5F0EB" : "#B5AEA4", transition: "all 0.4s ease",
         boxShadow: selected.length > 0 ? "0 4px 20px rgba(107, 93, 79, 0.25)" : "none",
       }}>Continue</button>
     </div>
@@ -166,88 +217,79 @@ function PhotoStep({ onPhoto, onSkip }) {
   const [cameraActive, setCameraActive] = useState(false);
   const [captured, setCaptured] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
 
+  const analysisSteps = ["Mapping treatment areas…", "Assessing skin texture…", "Calculating optimal lift…", "Generating your plan…"];
+
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
 
   const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
   }, []);
 
   useEffect(() => { return () => stopCamera(); }, [stopCamera]);
 
   const videoCallbackRef = useCallback((node) => {
     videoRef.current = node;
-    if (node && streamRef.current) {
-      node.srcObject = streamRef.current;
-      node.play().catch(() => {});
-    }
+    if (node && streamRef.current) { node.srcObject = streamRef.current; node.play().catch(() => {}); }
   }, [cameraActive]);
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } }
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } } });
       streamRef.current = stream;
       setCameraActive(true);
-    } catch (err) {
-      console.error("Camera error:", err);
-      alert("Could not access camera. You can skip this step — no worries!");
-    }
+    } catch (err) { alert("Could not access camera. No worries — you can skip this step!"); }
   };
 
   const takePhoto = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+    const video = videoRef.current; const canvas = canvasRef.current;
     if (!video || !canvas) return;
     const size = Math.min(video.videoWidth, video.videoHeight);
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext("2d");
-    const sx = (video.videoWidth - size) / 2;
-    const sy = (video.videoHeight - size) / 2;
-    ctx.translate(size, 0);
-    ctx.scale(-1, 1);
+    const sx = (video.videoWidth - size) / 2; const sy = (video.videoHeight - size) / 2;
+    ctx.translate(size, 0); ctx.scale(-1, 1);
     ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-    setCaptured(dataUrl);
-    stopCamera();
-    setCameraActive(false);
+    setCaptured(canvas.toDataURL("image/jpeg", 0.8));
+    stopCamera(); setCameraActive(false);
   };
 
-  const retake = () => {
-    setCaptured(null);
-    startCamera();
-  };
+  const retake = () => { setCaptured(null); startCamera(); };
 
   const confirm = () => {
-    setAnalyzing(true);
-    setTimeout(() => {
-      onPhoto(captured);
-    }, 2200);
+    setAnalyzing(true); setAnalysisStep(0);
+    setTimeout(() => setAnalysisStep(1), 400);
+    setTimeout(() => setAnalysisStep(2), 800);
+    setTimeout(() => setAnalysisStep(3), 1200);
+    setTimeout(() => onPhoto(captured), 1800);
   };
 
   if (analyzing) {
     return (
       <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 400, textAlign: "center" }}>
         <div style={{ position: "relative", width: 120, height: 120, marginBottom: 32 }}>
-          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px solid #EDEAE5", borderTopColor: "#8B7355", animation: "spin 1s linear infinite" }} />
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px solid #EDEAE5", borderTopColor: "#8B7355", animation: "spin 0.8s linear infinite" }} />
           <div style={{ position: "absolute", inset: 12, borderRadius: "50%", overflow: "hidden" }}>
             <img src={captured} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
-        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 400, color: "#3D3428", marginBottom: 8 }}>
-          Analyzing your <span style={{ fontStyle: "italic" }}>skin</span>...
-        </h3>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82" }}>
-          This will just take a moment
-        </p>
+        <div style={{ minHeight: 60 }}>
+          {analysisSteps.map((step, i) => (
+            <div key={i} style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 500, color: i === analysisStep ? "#1A1612" : i < analysisStep ? "#9A8E82" : "transparent",
+              transition: "all 0.3s ease", marginBottom: 4,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}>
+              {i < analysisStep && <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C4A882"/><path d="M4 7l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>}
+              {i === analysisStep && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#8B7355", animation: "pulse 0.8s ease infinite" }} />}
+              {step}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -256,24 +298,15 @@ function PhotoStep({ onPhoto, onSkip }) {
     return (
       <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transition: "all 0.6s ease" }}>
         <StepIndicator current={2} total={4} />
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 20px" }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 36px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.3, margin: "16px 0 20px" }}>
           Looking <span style={{ fontStyle: "italic" }}>great</span>!
         </h2>
         <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 24, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
           <img src={captured} alt="Your photo" style={{ width: "100%", display: "block", aspectRatio: "1", objectFit: "cover" }} />
         </div>
         <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={retake} style={{
-            flex: 1, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-            border: "2px solid #6B5D4F", borderRadius: 50, cursor: "pointer", background: "transparent", color: "#6B5D4F",
-          }}>Retake</button>
-          <button onClick={confirm} style={{
-            flex: 2, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-            letterSpacing: "0.1em", textTransform: "uppercase",
-            border: "none", borderRadius: 50, cursor: "pointer",
-            background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
-            boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)",
-          }}>Use This Photo</button>
+          <button onClick={retake} style={{ flex: 1, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, border: "2px solid #6B5D4F", borderRadius: 50, cursor: "pointer", background: "transparent", color: "#3D3428" }}>Retake</button>
+          <button onClick={confirm} style={{ flex: 2, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)" }}>Use This Photo</button>
         </div>
       </div>
     );
@@ -282,44 +315,22 @@ function PhotoStep({ onPhoto, onSkip }) {
   return (
     <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <StepIndicator current={2} total={4} />
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 30px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 6px" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 36px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.3, margin: "16px 0 6px" }}>
         Let’s take a quick <span style={{ fontStyle: "italic" }}>look</span>
       </h2>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, marginBottom: 20 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", lineHeight: 1.6, marginBottom: 20 }}>
         A quick snapshot of just your mouth area helps us personalize your recommendation. We don’t store or save your photo.
       </p>
-
       {!cameraActive ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <div style={{
-            width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden",
-            background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16,
-          }}>
+          <div style={{ width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(139,115,85,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                <circle cx="12" cy="13" r="4"/>
-              </svg>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B7355", textAlign: "center", maxWidth: 200 }}>
-              Just the lower half of your face — nose to chin
-            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#3D3428", textAlign: "center", maxWidth: 240, fontWeight: 600 }}>Just the lower half of your face — nose to chin</p>
           </div>
-
-          <button onClick={startCamera} style={{
-            width: "100%", padding: "16px 32px",
-            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-            letterSpacing: "0.1em", textTransform: "uppercase",
-            border: "none", borderRadius: 50, cursor: "pointer",
-            background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
-            boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)",
-          }}>Open Camera</button>
-
-          <button onClick={onSkip} style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#B5AEA4",
-          }}>
+          <button onClick={startCamera} style={{ width: "100%", padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)" }}>Open Camera</button>
+          <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B5D4F" }}>
             If you’d prefer not to, no worries — <span style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>skip ahead</span>
           </button>
         </div>
@@ -327,55 +338,26 @@ function PhotoStep({ onPhoto, onSkip }) {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <div style={{ width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden", position: "relative", background: "#000" }}>
             <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
-
-            {/* Face guide overlay */}
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
-              {/* Dim overlay with cutout */}
-              <defs>
-                <mask id="guideMask">
-                  <rect width="300" height="300" fill="white"/>
-                  <ellipse cx="150" cy="155" rx="95" ry="75" fill="black"/>
-                </mask>
-              </defs>
+              <defs><mask id="guideMask"><rect width="300" height="300" fill="white"/><ellipse cx="150" cy="155" rx="95" ry="75" fill="black"/></mask></defs>
               <rect width="300" height="300" fill="rgba(0,0,0,0.35)" mask="url(#guideMask)"/>
-
-              {/* Guide ellipse */}
               <ellipse cx="150" cy="155" rx="95" ry="75" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeDasharray="8 4"/>
-
-              {/* Crosshair lines */}
               <line x1="150" y1="110" x2="150" y2="130" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
               <line x1="150" y1="180" x2="150" y2="200" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
               <line x1="85" y1="155" x2="105" y2="155" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
               <line x1="195" y1="155" x2="215" y2="155" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
-
-              {/* Corner brackets */}
               <path d="M70 105 L70 90 L85 90" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
               <path d="M230 105 L230 90 L215 90" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
               <path d="M70 205 L70 220 L85 220" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
               <path d="M230 205 L230 220 L215 220" fill="none" stroke="rgba(196,168,130,0.8)" strokeWidth="2" strokeLinecap="round"/>
-
-              {/* Label */}
-              <text x="150" y="245" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="11" fontFamily="sans-serif">Align your mouth area here</text>
+              <text x="150" y="245" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="12" fontFamily="sans-serif">Align your mouth area here</text>
             </svg>
           </div>
-
           <canvas ref={canvasRef} style={{ display: "none" }} />
-
-          {/* Capture button */}
-          <button onClick={takePhoto} style={{
-            width: 72, height: 72, borderRadius: "50%", border: "4px solid #C4A882",
-            background: "white", cursor: "pointer", padding: 4,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "white", transition: "all 0.2s", boxSizing: "border-box" }} />
+          <button onClick={takePhoto} style={{ width: 72, height: 72, borderRadius: "50%", border: "4px solid #C4A882", background: "white", cursor: "pointer", padding: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "white", boxSizing: "border-box" }} />
           </button>
-
-          <button onClick={() => { stopCamera(); setCameraActive(false); onSkip(); }} style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.6)",
-          }}>
-            Skip this step
-          </button>
+          <button onClick={() => { stopCamera(); setCameraActive(false); onSkip(); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Skip this step</button>
         </div>
       )}
     </div>
@@ -385,21 +367,18 @@ function PhotoStep({ onPhoto, onSkip }) {
 function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSelect, onNext }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setVisible(false); setTimeout(() => setVisible(true), 50); }, [question]);
-
   return (
     <div style={{ padding: "32px 24px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(30px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <StepIndicator current={stepNum} total={4} />
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, margin: "16px 0 8px" }}>{question}</h2>
-      {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", marginBottom: 28 }}>{subtitle}</p>}
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 38px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.3, margin: "16px 0 8px" }}>{question}</h2>
+      {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", marginBottom: 28 }}>{subtitle}</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: subtitle ? 0 : 28 }}>
         {options.map((opt, i) => {
           const isSelected = selected === opt.id;
           return (
             <button key={opt.id} onClick={() => { onSelect(opt.id); setTimeout(onNext, 400); }} style={{
-              display: "flex", alignItems: "center", gap: 16,
-              padding: "18px 20px", borderWidth: 2, borderStyle: "solid",
-              borderColor: isSelected ? "#8B7355" : "#EDEAE5",
-              borderRadius: 14, cursor: "pointer", textAlign: "left",
+              display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderWidth: 2, borderStyle: "solid",
+              borderColor: isSelected ? "#8B7355" : "#EDEAE5", borderRadius: 14, cursor: "pointer", textAlign: "left",
               background: isSelected ? "linear-gradient(135deg, #FAF6F1, #F5EDE4)" : "#FAFAF7",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               animation: visible ? `fadeSlideUp 0.4s ${i * 0.06}s both` : "none",
@@ -407,8 +386,8 @@ function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSe
             }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, background: isSelected ? "rgba(139, 115, 85, 0.12)" : "rgba(0,0,0,0.03)", transition: "all 0.3s ease", flexShrink: 0 }}>{opt.icon}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: isSelected ? "#3D3428" : "#5A4F43" }}>{opt.label}</div>
-                {opt.detail && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#A89880", marginTop: 2 }}>{opt.detail}</div>}
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, fontWeight: 700, color: "#1A1612" }}>{opt.label}</div>
+                {opt.detail && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", marginTop: 3 }}>{opt.detail}</div>}
               </div>
               <div style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, border: isSelected ? "none" : "2px solid #D4CFC8", background: isSelected ? "#6B5D4F" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s ease" }}>
                 {isSelected && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -421,31 +400,26 @@ function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSe
   );
 }
 
-function EmailCaptureStep({ email, onEmailChange, onSubmit, onSkip }) {
+) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
-
   return (
     <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ width: 64, height: 64, borderRadius: "50%", marginBottom: 24, background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🎁</div>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: "#1A1612", lineHeight: 1.3, marginBottom: 8 }}>
         Your results are <span style={{ fontStyle: "italic" }}>ready</span>
       </h2>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
         Enter your email to unlock your personalized recommendation and receive an exclusive discount.
       </p>
       <div style={{ width: "100%", maxWidth: 380, marginBottom: 12 }}>
         <input type="email" value={email} onChange={e => onEmailChange(e.target.value)} placeholder="your@email.com"
-          style={{ width: "100%", padding: "16px 20px", border: "2px solid #EDEAE5", borderRadius: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#3D3428", background: "#FAFAF7", outline: "none", transition: "border-color 0.3s ease", boxSizing: "border-box" }}
+          style={{ width: "100%", padding: "16px 20px", border: "2px solid #EDEAE5", borderRadius: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 17, color: "#1A1612", background: "#FAFAF7", outline: "none", transition: "border-color 0.3s ease", boxSizing: "border-box" }}
           onFocus={e => e.target.style.borderColor = "#C4A882"} onBlur={e => e.target.style.borderColor = "#EDEAE5"} />
       </div>
-      <button onClick={onSubmit} style={{ width: "100%", maxWidth: 380, padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", transition: "all 0.3s ease", marginBottom: 16 }}>
-        View My Results
-      </button>
-      <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#B5AEA4", textDecoration: "underline", textUnderlineOffset: 3 }}>
-        Skip for now
-      </button>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 24, fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#C4BDB4" }}>
+      <button onClick={onSubmit} style={{ width: "100%", maxWidth: 380, padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", marginBottom: 16 }}>View My Results</button>
+      <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B5D4F", textDecoration: "underline", textUnderlineOffset: 3 }}>Skip for now</button>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 24, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A8E82" }}>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5a2.5 2.5 0 00-2.5 2.5v2h-.25a.75.75 0 00-.75.75v3.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-3.5a.75.75 0 00-.75-.75H8.5V4A2.5 2.5 0 006 1.5zM4.5 4a1.5 1.5 0 013 0v2h-3V4z" fill="#C4BDB4"/></svg>
         We respect your privacy. Unsubscribe anytime.
       </div>
@@ -465,84 +439,163 @@ function StarRating({ rating }) {
   );
 }
 
-function ResultsStep({ areas, solution, braces, photo }) {
+function ProductCard({ product, isPrimary, index, visible }) {
+  return (
+    <div style={{ borderWidth: 2, borderStyle: "solid", borderColor: isPrimary ? "#C4A882" : "#EDEAE5", borderRadius: 20, marginBottom: 16, overflow: "hidden", background: "#FAFAF7", boxShadow: isPrimary ? "0 8px 32px rgba(196, 168, 130, 0.15)" : "none", animation: visible ? `fadeSlideUp 0.6s ${index * 0.15 + 0.2}s both` : "none" }}>
+      {isPrimary && (
+        <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "10px 0", textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: "#F5F0EB", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+          ⭐ Recommended for You
+        </div>
+      )}
+      <div style={{ padding: "24px 20px" }}>
+        <div style={{ display: "flex", gap: 16, marginBottom: 16, alignItems: "center" }}>
+          <div style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "#F5EDE4" }}>
+            <img src={product.image} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+          <div>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, color: "#1A1612", margin: 0, lineHeight: 1.2 }}>{product.name}</h3>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#8B7355", fontWeight: 500, marginTop: 4 }}>{product.tagline}</div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+          <StarRating rating={4.8} />
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#3D3428", fontWeight: 600 }}>4.8</span>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F" }}>· Shark Tank Winner</span>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+          {product.features.map(f => (
+            <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#3D3428", fontWeight: 500 }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#E8F5E9"/><path d="M5 8l2 2 4-4" stroke="#4CAF50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              {f}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 700, color: "#1A1612" }}>{product.price}</span>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#4A4340", background: "rgba(139,115,85,0.08)", padding: "4px 10px", borderRadius: 6, fontWeight: 600 }}>Lift: {product.liftForce}</div>
+        </div>
+
+        <a href={`https://angellift.com/products/${product.slug}`} target="_blank" rel="noopener noreferrer" style={{
+          display: "block", width: "100%", padding: "18px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700,
+          letterSpacing: "0.1em", textTransform: "uppercase", borderRadius: 50, cursor: "pointer", textAlign: "center", textDecoration: "none", boxSizing: "border-box",
+          background: isPrimary ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent",
+          color: isPrimary ? "#F5F0EB" : "#3D3428", border: isPrimary ? "none" : "2px solid #3D3428",
+          boxShadow: isPrimary ? "0 4px 20px rgba(107, 93, 79, 0.25)" : "none",
+        }}>{isPrimary ? "Buy Now →" : "Add to Cart"}</a>
+      </div>
+    </div>
+  );
+}
+
+function DiscountCapture() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [copying, setCopying] = useState(false);
+
+  const handleSubmit = () => {
+    if (email && email.includes("@")) {
+      setSubmitted(true);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div style={{ marginTop: 24, padding: "24px 20px", background: "linear-gradient(135deg, #F0EBE3, #E8DFD3)", borderRadius: 20, textAlign: "center", border: "2px solid #C4A882" }}>
+        <div style={{ fontSize: 32, marginBottom: 8 }}>🎉</div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, color: "#1A1612", marginBottom: 6 }}>
+          Your 10% discount code:
+        </div>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: 28, fontWeight: 700, color: "#6B5D4F",
+          background: "white", padding: "14px 24px", borderRadius: 12, margin: "12px 0",
+          letterSpacing: "0.2em", border: "2px dashed #C4A882", display: "inline-block",
+          cursor: "pointer", userSelect: "all",
+        }}
+        onClick={() => { navigator.clipboard.writeText("MYANGELLIFT10"); setCopying(true); setTimeout(() => setCopying(false), 2000); }}
+        >
+          {copying ? "✅ Copied!" : "MYANGELLIFT10"}
+        </div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", marginTop: 8 }}>
+          Tap the code to copy · Apply at checkout
+        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A8E82", marginTop: 4 }}>
+          We’ll also send it to your email just in case 📧
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 24, padding: "24px 20px", background: "linear-gradient(135deg, #FBF7F2, #F5EDE4)", borderRadius: 20, border: "2px solid #EDEAE5" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+        <div style={{ fontSize: 24 }}>🎁</div>
+        <div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, fontWeight: 700, color: "#1A1612" }}>
+            First time trying AngelLift?
+          </div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340" }}>
+            Get <span style={{ color: "#8B7355", fontWeight: 700 }}>10% off</span> your first order
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 10 }}>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
+          onKeyDown={e => { if (e.key === "Enter") handleSubmit(); }}
+          style={{ flex: 1, padding: "14px 16px", border: "2px solid #EDEAE5", borderRadius: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#1A1612", background: "white", outline: "none", boxSizing: "border-box", minWidth: 0 }}
+          onFocus={e => e.target.style.borderColor = "#C4A882"} onBlur={e => e.target.style.borderColor = "#EDEAE5"} />
+        <button onClick={handleSubmit} style={{
+          padding: "14px 20px", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700,
+          border: "none", borderRadius: 14, cursor: "pointer", whiteSpace: "nowrap",
+          background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
+          boxShadow: "0 2px 12px rgba(107, 93, 79, 0.2)",
+        }}>Get Code</button>
+      </div>
+      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#9A8E82", marginTop: 10, textAlign: "center" }}>
+        No spam, just your discount. Unsubscribe anytime.
+      </div>
+    </div>
+  );
+}
+
+function ResultsStep({ areas, solution, braces }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
 
-  const getRecommendation = () => {
-    if (areas.length >= 2 || areas.includes("nasolabial") || areas.includes("marionette")) {
-      return { primary: 1, reason: "Based on your skin analysis and multiple treatment areas, our Advanced DermaStrips provide maximum correction and coverage." };
-    }
-    return { primary: 0, reason: "Based on your skin analysis, our Original DermaStrips are the perfect starting point for targeted correction." };
-  };
-
-  const rec = getRecommendation();
+  const { primary, secondary, reason } = getRecommendations(areas, solution, braces);
 
   return (
     <div style={{ padding: "32px 24px 100px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: "#6B5D4F", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: "#3D3428", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
           ✨ Your Personalized Results
         </div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
-          We recommend the<br />
-          <span style={{ fontStyle: "italic", fontWeight: 500 }}>{PRODUCTS[rec.primary].subtitle}</span> DermaStrip
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 38px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.3, marginBottom: 12 }}>
+          We recommend the<br /><span style={{ fontStyle: "italic", fontWeight: 500 }}>{primary.subtitle}</span> DermaStrip
         </h2>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A8E82", lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>{rec.reason}</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", lineHeight: 1.7, maxWidth: 400, margin: "0 auto" }}>{reason}</p>
       </div>
 
-      {PRODUCTS.map((product, i) => {
-        const isPrimary = i === rec.primary;
-        return (
-          <div key={product.id} style={{ borderWidth: 2, borderStyle: "solid", borderColor: isPrimary ? "#C4A882" : "#EDEAE5", borderRadius: 20, padding: 0, marginBottom: 16, overflow: "hidden", background: "#FAFAF7", position: "relative", boxShadow: isPrimary ? "0 8px 32px rgba(196, 168, 130, 0.15)" : "none", animation: visible ? `fadeSlideUp 0.6s ${i * 0.15 + 0.2}s both` : "none" }}>
-            {isPrimary && (
-              <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "8px 0", textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: "#F5F0EB", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                Recommended for You
-              </div>
-            )}
-            <div style={{ padding: "24px 20px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                <div>
-                  {!isPrimary && product.badge && (
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8B7355", background: "rgba(139,115,85,0.08)", padding: "4px 10px", borderRadius: 6, display: "inline-block", marginBottom: 8 }}>{product.badge}</span>
-                  )}
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, color: "#3D3428", margin: 0 }}>{product.name}</h3>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#8B7355", fontWeight: 500 }}>{product.subtitle}</div>
-                </div>
-                <div style={{ width: 72, height: 72, borderRadius: 14, flexShrink: 0, background: "linear-gradient(135deg, #EBE0D2 0%, #D4C8B8 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <StarRating rating={product.rating} />
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F", fontWeight: 600 }}>{product.rating}</span>
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#A89880" }}>({product.reviews.toLocaleString()} reviews)</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-                {product.features.map(f => (
-                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F" }}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#E8F5E9"/><path d="M5 8l2 2 4-4" stroke="#4CAF50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    {f}
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 16 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 600, color: "#3D3428" }}>{product.price}</span>
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#B5AEA4", textDecoration: "line-through" }}>{product.comparePrice}</span>
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: "#C0392B", background: "rgba(192, 57, 43, 0.08)", padding: "3px 8px", borderRadius: 6 }}>SAVE {Math.round((1 - parseFloat(product.price.slice(1)) / parseFloat(product.comparePrice.slice(1))) * 100)}%</span>
-              </div>
-              <button style={{ width: "100%", padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", borderRadius: 50, cursor: "pointer", background: isPrimary ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent", color: isPrimary ? "#F5F0EB" : "#6B5D4F", border: isPrimary ? "none" : "2px solid #6B5D4F", boxShadow: isPrimary ? "0 4px 20px rgba(107, 93, 79, 0.25)" : "none", transition: "all 0.3s ease" }}
-              onMouseEnter={e => { e.target.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { e.target.style.transform = "none"; }}
-              >{isPrimary ? "Add to Cart" : "View Product"}</button>
-            </div>
-          </div>
-        );
-      })}
+      <ProductCard product={primary} isPrimary={true} index={0} visible={visible} />
+      <ProductCard product={secondary} isPrimary={false} index={1} visible={visible} />
 
-      <div style={{ textAlign: "center", marginTop: 28, padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
-        <div style={{ fontSize: 24, marginBottom: 8 }}>💯</div>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 500, color: "#3D3428", marginBottom: 4 }}>100% Money-Back Guarantee</div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A8E82", lineHeight: 1.5 }}>
-          If you don’t see visible results, we’ll refund your purchase. No questions asked.
+
+      <DiscountCapture />
+
+      <div style={{ textAlign: "center", marginTop: 20, padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#3D3428", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
+          💯 100% Money-Back Guarantee
+        </div>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", lineHeight: 1.6 }}>
+          92% of users see visible results in 30 days. If you don’t, we’ll refund your purchase.
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", marginTop: 12, padding: "14px", background: "rgba(139,115,85,0.04)", borderRadius: 12 }}>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", lineHeight: 1.5 }}>
+          ✅ Clinically proven  ·  🇺🇸 Made in USA  ·  🌿 Hypoallergenic
         </div>
       </div>
     </div>
@@ -555,7 +608,6 @@ export default function AngelLiftQuiz() {
   const [photo, setPhoto] = useState(null);
   const [solution, setSolution] = useState(null);
   const [braces, setBraces] = useState(null);
-  const [email, setEmail] = useState("");
   const containerRef = useRef(null);
 
   const scrollTop = () => { if (containerRef.current) containerRef.current.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -568,13 +620,14 @@ export default function AngelLiftQuiz() {
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap');
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
       <div style={{ maxWidth: 440, margin: "0 auto", minHeight: "100vh", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
         {step > STEPS.WELCOME && step < STEPS.RESULTS && (
           <>
             <ProgressBar step={step} total={6} />
             <button onClick={() => goTo(step - 1)} style={{ position: "absolute", top: 12, left: 12, zIndex: 100, width: 40, height: 40, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.8)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="#6B5D4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="#3D3428" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           </>
         )}
@@ -595,10 +648,9 @@ export default function AngelLiftQuiz() {
                 { id: "yes", label: "Yes", icon: "😁", detail: "Had braces at some point" },
                 { id: "no", label: "No", icon: "🙂", detail: "Never had braces" },
               ]}
-              selected={braces} onSelect={setBraces} onNext={() => goTo(STEPS.EMAIL_CAPTURE)} />
+              selected={braces} onSelect={setBraces} onNext={() => goTo(STEPS.RESULTS)} />
           )}
-          {step === STEPS.EMAIL_CAPTURE && <EmailCaptureStep email={email} onEmailChange={setEmail} onSubmit={() => goTo(STEPS.RESULTS)} onSkip={() => goTo(STEPS.RESULTS)} />}
-          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} photo={photo} />}
+          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} />}
         </div>
       </div>
     </>
