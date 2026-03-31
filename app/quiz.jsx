@@ -318,20 +318,24 @@ function PhotoStep({ onPhoto, onSkip }) {
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.2, margin: "8px 0 4px" }}>
         Let’s take a quick <span style={{ fontStyle: "italic" }}>look</span>
       </h2>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", lineHeight: 1.5, marginBottom: 12 }}>
-        A quick snapshot of just your mouth area helps us personalize your recommendation. We don’t store or save your photo.
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", lineHeight: 1.5, marginBottom: 6 }}>
+        A quick snapshot of just your mouth area helps us personalize your recommendation.
       </p>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: "8px 14px", background: "rgba(139,115,85,0.06)", borderRadius: 10 }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.5 3h1v1h-1V4zm0 2.5h1V11h-1V6.5z" fill="#8B7355"/></svg>
+        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", fontWeight: 600 }}>Your photo is never stored — it’s deleted instantly.</span>
+      </div>
       {!cameraActive ? (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, flex: 1 }}>
           <div style={{ width: "100%", flex: 1, minHeight: 0, borderRadius: 16, overflow: "hidden", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(139,115,85,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(139,115,85,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#3D3428", textAlign: "center", maxWidth: 240, fontWeight: 600 }}>Just the lower half of your face — nose to chin</p>
           </div>
-          <button onClick={startCamera} style={{ width: "100%", padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)" }}>Open Camera</button>
-          <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B5D4F" }}>
-            If you’d prefer not to, no worries — <span style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>skip ahead</span>
+          <button onClick={startCamera} style={{ width: "100%", padding: "14px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)" }}>Open Camera</button>
+          <button onClick={onSkip} style={{ width: "100%", padding: "14px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: "#6B5D4F", background: "rgba(139,115,85,0.06)", border: "2px solid #D4CFC8", borderRadius: 50, cursor: "pointer" }}>
+            Skip This Step — No Photo Needed
           </button>
         </div>
       ) : (
@@ -357,7 +361,7 @@ function PhotoStep({ onPhoto, onSkip }) {
           <button onClick={takePhoto} style={{ width: 72, height: 72, borderRadius: "50%", border: "4px solid #C4A882", background: "white", cursor: "pointer", padding: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "white", boxSizing: "border-box" }} />
           </button>
-          <button onClick={() => { stopCamera(); setCameraActive(false); onSkip(); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Skip this step</button>
+          <button onClick={() => { stopCamera(); setCameraActive(false); onSkip(); }} style={{ padding: "10px 28px", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: "white", background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.4)", borderRadius: 50, cursor: "pointer", backdropFilter: "blur(4px)" }}>Skip — No Photo Needed</button>
         </div>
       )}
     </div>
@@ -607,8 +611,9 @@ export default function AngelLiftQuiz() {
         input { font-size: 16px !important; }
         .qz { height: 100vh; height: 100dvh; }
         @media (min-width: 768px) {
-          .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-          .qz { height: min(720px, 88vh) !important; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; }
+          .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+          .qz { max-width: 520px !important; height: auto !important; min-height: min(700px, 85vh) !important; max-height: 92vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; }
+          .qz-inner { height: auto !important; min-height: min(700px, 85vh); max-height: 92vh; }
         }
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -623,7 +628,7 @@ export default function AngelLiftQuiz() {
             </button>
           </>
         )}
-        <div ref={containerRef} style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: step === STEPS.RESULTS ? "auto" : "hidden", overflowX: "hidden", WebkitOverflowScrolling: "touch", position: "relative" }}>
+        <div ref={containerRef} className="qz-inner" style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: step === STEPS.RESULTS ? "auto" : "hidden", overflowX: "hidden", WebkitOverflowScrolling: "touch", position: "relative" }}>
           {step > STEPS.WELCOME && step < STEPS.RESULTS && <div style={{ height: 36, flexShrink: 0 }} />}
           {step === STEPS.WELCOME && <WelcomeStep onStart={() => goTo(STEPS.AREAS)} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.PHOTO)} />}
