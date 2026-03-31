@@ -590,6 +590,32 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
       <button onClick={onRetake} style={{ display: "block", margin: "20px auto 0", background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#9A8E82", textDecoration: "underline", textUnderlineOffset: 3, padding: "12px 20px" }}>
         ← Retake Quiz
       </button>
+
+      <div style={{ marginTop: 24, padding: "20px", background: "rgba(139,115,85,0.04)", borderRadius: 16 }}>
+        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: "#9A8E82", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12, textAlign: "center" }}>
+          Explore AngelLift
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+          {[
+            { label: "Shop All", href: "https://angellift.com/collections/skin-care" },
+            { label: "30 Day Results", href: "https://angellift.com/pages/30-day-results" },
+            { label: "How to Use", href: "https://angellift.com/pages/how-to-use-dermastrips" },
+            { label: "FAQ", href: "https://angellift.gorgias.help/en-US" },
+            { label: "Reviews", href: "https://angellift.com/pages/faq" },
+          ].map(link => (
+            <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#6B5D4F",
+              padding: "8px 16px", background: "white", borderRadius: 50,
+              border: "1.5px solid #EDEAE5", textDecoration: "none",
+              transition: "all 0.2s ease",
+            }}>{link.label}</a>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", marginTop: 20, paddingBottom: 20 }}>
+        <a href="https://angellift.com" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "#C4A882", textDecoration: "none" }}>angellift.com</a>
+      </div>
     </div>
   );
 }
@@ -616,9 +642,10 @@ export default function AngelLiftQuiz() {
         .qz { height: 100vh; height: 100dvh; }
         @media (min-width: 768px) {
           .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-          .qz { max-width: 520px !important; height: auto !important; min-height: min(680px, 85vh) !important; max-height: 90vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.4s ease; }
+          .qz { max-width: 520px !important; height: auto !important; min-height: min(680px, 85vh) !important; max-height: 90vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.3s ease; }
           .qz-inner { height: auto !important; min-height: min(680px, 85vh); max-height: 90vh; }
-          .qz.qz-wide { max-width: 880px !important; }
+          .qz.qz-wide { max-width: 880px !important; max-height: none !important; }
+          .qz.qz-wide .qz-inner { max-height: none !important; overflow: visible !important; }
           .results-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
           .results-footer { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; align-items: start; }
           .results-footer > * { margin-top: 0 !important; }
@@ -637,7 +664,7 @@ export default function AngelLiftQuiz() {
           </>
         )}
         <div ref={containerRef} className="qz-inner" style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: step === STEPS.RESULTS ? "auto" : "hidden", overflowX: "hidden", WebkitOverflowScrolling: "touch", position: "relative" }}>
-          {step > STEPS.WELCOME && step < STEPS.RESULTS && <div style={{ height: 36, flexShrink: 0 }} />}
+          {step > STEPS.WELCOME && step < STEPS.RESULTS && <div style={{ height: 48, flexShrink: 0 }} />}
           {step === STEPS.WELCOME && <WelcomeStep onStart={() => goTo(STEPS.AREAS)} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.PHOTO)} />}
           {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.CURRENT_SOLUTION); }} onSkip={() => goTo(STEPS.CURRENT_SOLUTION)} />}
