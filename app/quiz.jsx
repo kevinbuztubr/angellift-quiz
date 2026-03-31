@@ -691,6 +691,7 @@ export default function AngelLiftQuiz() {
       <style>{`
         *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; }
+        @media (min-width: 768px) { html, body { overflow: auto !important; height: auto !important; } }
         button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #C4A882; outline-offset: 2px; }
         input { font-size: 16px !important; }
         .qz { height: 100vh; height: 100dvh; }
