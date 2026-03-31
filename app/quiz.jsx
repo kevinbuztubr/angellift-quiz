@@ -735,15 +735,6 @@ export default function AngelLiftQuiz() {
             </button>
           </>
         )}
-        <div ref={containerRef} className="qz-inner" style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: step === STEPS.RESULTS ? "auto" : "hidden", overflowX: "hidden", WebkitOverflowScrolling: "touch", position: "relative" }}>
-          {step > STEPS.WELCOME && step < STEPS.RESULTS && <div style={{ height: 48, flexShrink: 0 }} />}
-          {step === STEPS.WELCOME && <WelcomeStep onStart={() => {
-            try { if (window.parent !== window) {
-              window.parent.postMessage({ type: "meta_pixel", event: "ViewContent", data: { content_name: "DermaStrip Quiz", content_category: "quiz" }}, "*");
-              window.parent.postMessage({ type: "gtag_event", event: "begin_checkout", data: { items: [{ item_name: "DermaStrip Quiz" }] }}, "*");
-            }} catch(e) {}
-            goTo(STEPS.AREAS);
-          }} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.CURRENT_SOLUTION)} />}
           {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.RESULTS); }} onSkip={() => { setPhoto(null); goTo(STEPS.RESULTS); }} />}
           {step === STEPS.CURRENT_SOLUTION && (
