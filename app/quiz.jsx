@@ -524,6 +524,7 @@ function DiscountCapture({ quizData }) {
           "Quiz - Recommended Product": qd.recommended_primary || "",
           "Quiz - Secondary Product": qd.recommended_secondary || "",
           "Quiz - Completed": "Yes",
+          "Quiz - Used Camera": qd.photoUsed ? "Yes" : "No",
           "Quiz - Discount Code": "START10",
         };
         if (window.parent !== window) {
@@ -536,6 +537,7 @@ function DiscountCapture({ quizData }) {
             recommended_product_price: qd.recommended_primary_price,
             recommended_product_variant: qd.recommended_primary_variant,
             secondary_product: qd.recommended_secondary,
+            photo_used: qd.photoUsed || false,
             discount_code: "START10",
             email: email,
           }}, "*");
@@ -611,7 +613,7 @@ function DiscountCapture({ quizData }) {
   );
 }
 
-function ResultsStep({ areas, solution, braces, onRetake }) {
+function ResultsStep({ areas, solution, braces, photoUsed, onRetake }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     setTimeout(() => setVisible(true), 50);
@@ -673,7 +675,7 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
       </div>
 
       <div className="results-footer" style={{ display: "flex", flexDirection: "column" }}>
-        <DiscountCapture quizData={{ areas, solution, braces, recommended_primary: primary.name, recommended_secondary: secondary.name, recommended_primary_price: primary.price, recommended_primary_variant: primary.variantId }} />
+        <DiscountCapture quizData={{ areas, solution, braces, photoUsed, recommended_primary: primary.name, recommended_secondary: secondary.name, recommended_primary_price: primary.price, recommended_primary_variant: primary.variantId }} />
 
         <div style={{ marginTop: 20 }}>
           <div style={{ textAlign: "center", padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
@@ -779,7 +781,20 @@ export default function AngelLiftQuiz() {
             goTo(STEPS.AREAS);
           }} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.CURRENT_SOLUTION)} />}
-          {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.RESULTS); }} onSkip={() => { setPhoto(null); goTo(STEPS.RESULTS); }} />}
+          {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => {
+            setPhoto(p);
+            try { if (window.parent !== window) {
+              window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Photo Taken", data: { photo_used: true }}, "*");
+              window.parent.postMessage({ type: "meta_pixel", event: "CustomizeProduct", data: { content_name: "Quiz Photo Used" }}, "*");
+            }} catch(e) {}
+            goTo(STEPS.RESULTS);
+          }} onSkip={() => {
+            setPhoto(null);
+            try { if (window.parent !== window) {
+              window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Photo Skipped", data: { photo_used: false }}, "*");
+            }} catch(e) {}
+            goTo(STEPS.RESULTS);
+          }} />}
           {step === STEPS.CURRENT_SOLUTION && (
             <SingleSelectStep stepNum={2}
               question={<>What are you currently<br />using for <span style={{ fontStyle: "italic" }}>this issue</span>?</>}
@@ -795,7 +810,7 @@ export default function AngelLiftQuiz() {
               ]}
               selected={braces} onSelect={setBraces} onNext={() => goTo(STEPS.PHOTO)} />
           )}
-          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} onRetake={() => { setAreas([]); setSolution(null); setBraces(null); setPhoto(null); goTo(STEPS.WELCOME); }} />}
+          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} photoUsed={!!photo} onRetake={() => { setAreas([]); setSolution(null); setBraces(null); setPhoto(null); goTo(STEPS.WELCOME); }} />}
         </div>
       </div></div>
     </>
