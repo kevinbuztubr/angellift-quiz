@@ -180,7 +180,7 @@ function AreasStep({ selected, onToggle, onNext }) {
         Which areas would you<br />like to <span style={{ fontStyle: "italic" }}>correct</span>?
       </h2>
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", marginBottom: 12 }}>Select all that apply</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 8, flex: 1, minHeight: 0 }}>
+      <div className="quiz-areas-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 8, flex: 1, minHeight: 0 }}>
         {AREAS.map((area, i) => {
           const isSelected = selected.includes(area.id);
           return (
@@ -696,10 +696,10 @@ export default function AngelLiftQuiz() {
         .qz { height: 100vh; height: 100dvh; }
         @media (min-width: 768px) {
           .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
-          .qz { max-width: 520px !important; height: auto !important; min-height: min(680px, 85vh) !important; max-height: 90vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.3s ease; margin-top: auto; margin-bottom: auto; }
-          .qz-inner { height: auto !important; min-height: min(680px, 85vh); max-height: 90vh; }
-          .qz.qz-wide { max-width: 880px !important; max-height: none !important; min-height: auto !important; height: auto !important; overflow: visible !important; }
-          .qz.qz-wide .qz-inner { max-height: none !important; min-height: auto !important; height: auto !important; overflow: visible !important; overflow-y: visible !important; }
+          .qz { max-width: 720px !important; height: auto !important; min-height: 0 !important; max-height: none !important; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.3s ease; margin-top: auto; margin-bottom: auto; overflow: visible !important; }
+          .qz-inner { height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; overflow-y: visible !important; }
+          .qz.qz-wide { max-width: 900px !important; }
+          .quiz-areas-grid { grid-template-columns: repeat(4, 1fr) !important; }
           .results-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
           .results-footer { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; align-items: start; }
           .results-footer > * { margin-top: 0 !important; }
