@@ -1,6 +1,11 @@
 export const metadata = {
   title: 'AngelLift® Quiz - Find Your Perfect DermaStrip',
-  description: 'Take our 60-
+  description: 'Take our 60-second quiz to discover the right DermaStrip for your unique needs.',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
   viewportFit: 'cover',
 };
 
