@@ -181,10 +181,11 @@ function PhotoStep({ onPhoto, onSkip }) {
 
   useEffect(() => { return () => stopCamera(); }, [stopCamera]);
 
-  useEffect(() => {
-    if (cameraActive && videoRef.current && streamRef.current) {
-      videoRef.current.srcObject = streamRef.current;
-      videoRef.current.play().catch(() => {});
+  const videoCallbackRef = useCallback((node) => {
+    videoRef.current = node;
+    if (node && streamRef.current) {
+      node.srcObject = streamRef.current;
+      node.play().catch(() => {});
     }
   }, [cameraActive]);
 
@@ -325,7 +326,7 @@ function PhotoStep({ onPhoto, onSkip }) {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <div style={{ width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden", position: "relative", background: "#000" }}>
-            <video ref={videoRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
+            <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
 
             {/* Face guide overlay */}
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
@@ -363,13 +364,10 @@ function PhotoStep({ onPhoto, onSkip }) {
           {/* Capture button */}
           <button onClick={takePhoto} style={{
             width: 72, height: 72, borderRadius: "50%", border: "4px solid #C4A882",
-            background: "white", cursor: "pointer", padding: 0, position: "relative",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            background: "white", cursor: "pointer", padding: 4,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <div style={{ width: "100%", height: "100%", borderRadius: "50%", border: "3px solid transparent", background: "white", transition: "all 0.2s" }}
-              onMouseEnter={e => e.target.style.background = "#F0E8DD"}
-              onMouseLeave={e => e.target.style.background = "white"}
-            />
+            <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "white", transition: "all 0.2s", boxSizing: "border-box" }} />
           </button>
 
           <button onClick={() => { stopCamera(); setCameraActive(false); onSkip(); }} style={{
