@@ -24,21 +24,21 @@ const AREAS = [
 ];
 
 const SOLUTIONS = [
-  { id: "injections", label: "Injections / Fillers", icon: "\u{1F489}", detail: "Temporary results, ongoing cost" },
-  { id: "moisturizer", label: "Moisturizer / Cream", icon: "\u{1F9F4}", detail: "Surface-level hydration only" },
-  { id: "tape", label: "Face Tape", icon: "\u{1F4CE}", detail: "Temporary hold, visible" },
-  { id: "nothing", label: "Nothing yet", icon: "\u{1F937}\u{200D}\u{2640}\u{FE0F}", detail: "Looking for my first solution" },
+  { id: "injections", label: "Injections / Fillers", icon: "💉", detail: "Temporary results, ongoing cost" },
+  { id: "moisturizer", label: "Moisturizer / Cream", icon: "🧴", detail: "Surface-level hydration only" },
+  { id: "tape", label: "Face Tape", icon: "📎", detail: "Temporary hold, visible" },
+  { id: "nothing", label: "Nothing yet", icon: "🤷‍♀️", detail: "Looking for my first solution" },
 ];
 
 const PRODUCTS = [
   {
-    id: "original", name: "AngelLift\u00AE DermaStrips", subtitle: "Original",
+    id: "original", name: "AngelLift® DermaStrips", subtitle: "Original",
     price: "$49.95", comparePrice: "$69.95", rating: 4.8, reviews: 2847,
     badge: "Best Seller",
     features: ["30-day supply", "Visible results in days", "Hypoallergenic & non-toxic"],
   },
   {
-    id: "advanced", name: "AngelLift\u00AE DermaStrips", subtitle: "Advanced",
+    id: "advanced", name: "AngelLift® DermaStrips", subtitle: "Advanced",
     price: "$59.95", comparePrice: "$79.95", rating: 4.9, reviews: 1203,
     badge: "Premium",
     features: ["60-day supply", "Enhanced comfort fit", "Maximum correction"],
@@ -77,7 +77,7 @@ function WelcomeStep({ onStart }) {
     }}>
       <div style={{ width: 80, height: 1, background: "linear-gradient(90deg, transparent, #C4A882, transparent)", marginBottom: 32 }} />
       <div style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#C4A882", marginBottom: 20 }}>
-        AngelLift\u00AE
+        AngelLift®
       </div>
       <h1 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: "clamp(28px, 6vw, 42px)", fontWeight: 300, color: "#3D3428", lineHeight: 1.2, marginBottom: 16, maxWidth: 440 }}>
         Discover Your Perfect<br />
@@ -103,7 +103,7 @@ function WelcomeStep({ onStart }) {
       onMouseLeave={e => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 4px 24px rgba(107, 93, 79, 0.3)"; }}
       >Start Quiz</button>
       <div style={{ display: "flex", gap: 24, marginTop: 40, opacity: 0.5 }}>
-        {["\u{1F33F} Clean", "\u{1F1FA}\u{1F1F8} Made in USA", "\u{1F4AF} Guaranteed"].map(t => (
+        {["🌿 Clean", "🇺🇸 Made in USA", "💯 Guaranteed"].map(t => (
           <span key={t} style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 11, color: "#8A7E72", letterSpacing: "0.05em" }}>{t}</span>
         ))}
       </div>
@@ -223,7 +223,7 @@ function EmailCaptureStep({ email, onEmailChange, onSubmit, onSkip }) {
 
   return (
     <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
-      <div style={{ width: 64, height: 64, borderRadius: "50%", marginBottom: 24, background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>\u{1F381}</div>
+      <div style={{ width: 64, height: 64, borderRadius: "50%", marginBottom: 24, background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🎁</div>
       <h2 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 28, fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
         Your results are <span style={{ fontStyle: "italic" }}>ready</span>
       </h2>
@@ -278,7 +278,7 @@ function ResultsStep({ areas, solution, braces }) {
     <div style={{ padding: "32px 24px 100px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "\'DM Sans\', sans-serif", fontSize: 12, fontWeight: 600, color: "#6B5D4F", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
-          \u2728 Your Personalized Results
+          ✨ Your Personalized Results
         </div>
         <h2 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#3D3428", lineHeight: 1.3, marginBottom: 8 }}>
           We recommend the<br />
@@ -305,7 +305,7 @@ function ResultsStep({ areas, solution, braces }) {
                   <h3 style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 22, fontWeight: 500, color: "#3D3428", margin: 0 }}>{product.name}</h3>
                   <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 14, color: "#8B7355", fontWeight: 500 }}>{product.subtitle}</div>
                 </div>
-                <div style={{ width: 72, height: 72, borderRadius: 14, flexShrink: 0, background: "linear-gradient(135deg, #EBE0D2 0%, #D4C8B8 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>\u{1F4E6}</div>
+                <div style={{ width: 72, height: 72, borderRadius: 14, flexShrink: 0, background: "linear-gradient(135deg, #EBE0D2 0%, #D4C8B8 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>📦</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                 <StarRating rating={product.rating} />
@@ -335,10 +335,10 @@ function ResultsStep({ areas, solution, braces }) {
       })}
 
       <div style={{ textAlign: "center", marginTop: 28, padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
-        <div style={{ fontSize: 24, marginBottom: 8 }}>\u{1F4AF}</div>
+        <div style={{ fontSize: 24, marginBottom: 8 }}>💯</div>
         <div style={{ fontFamily: "\'Cormorant Garamond\', serif", fontSize: 18, fontWeight: 500, color: "#3D3428", marginBottom: 4 }}>100% Money-Back Guarantee</div>
         <div style={{ fontFamily: "\'DM Sans\', sans-serif", fontSize: 13, color: "#9A8E82", lineHeight: 1.5 }}>
-          If you don\u2019t see visible results, we\u2019ll refund your purchase. No questions asked.
+          If you don’t see visible results, we’ll refund your purchase. No questions asked.
         </div>
       </div>
     </div>
@@ -385,8 +385,8 @@ export default function AngelLiftQuiz() {
               question={<>Have you ever had<br /><span style={{ fontStyle: "italic" }}>braces</span>?</>}
               subtitle="This helps us determine the best fit"
               options={[
-                { id: "yes", label: "Yes", icon: "\u{1F601}", detail: "Had braces at some point" },
-                { id: "no", label: "No", icon: "\u{1F642}", detail: "Never had braces" },
+                { id: "yes", label: "Yes", icon: "😁", detail: "Had braces at some point" },
+                { id: "no", label: "No", icon: "🙂", detail: "Never had braces" },
               ]}
               selected={braces} onSelect={setBraces} onNext={() => goTo(STEPS.EMAIL_CAPTURE)} />
           )}
