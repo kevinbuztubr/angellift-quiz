@@ -181,16 +181,19 @@ function PhotoStep({ onPhoto, onSkip }) {
 
   useEffect(() => { return () => stopCamera(); }, [stopCamera]);
 
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [cameraActive]);
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } }
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
       setCameraActive(true);
     } catch (err) {
       console.error("Camera error:", err);
