@@ -270,11 +270,10 @@ function PhotoStep({ onPhoto, onSkip }) {
 
   const confirm = () => {
     setAnalyzing(true); setAnalysisStep(0);
-    setTimeout(() => setAnalysisStep(1), 400);
-    setTimeout(() => setAnalysisStep(2), 800);
-    setTimeout(() => setAnalysisStep(3), 1000);
-    setTimeout(() => setAnalysisStep(4), 1400);
-    setTimeout(() => onPhoto(captured), 2200);
+    setTimeout(() => setAnalysisStep(1), 800);
+    setTimeout(() => setAnalysisStep(2), 1600);
+    setTimeout(() => setAnalysisStep(3), 2400);
+    setTimeout(() => setAnalysisStep(4), 3200);
   };
 
   if (analyzing) {
@@ -309,6 +308,14 @@ function PhotoStep({ onPhoto, onSkip }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#8B7355", marginTop: 8, fontWeight: 600 }}>
                 92% of users see visible results in 30 days.
               </p>
+              <button onClick={() => onPhoto(captured)} style={{
+                marginTop: 20, padding: "16px 40px", fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                border: "none", borderRadius: 50, cursor: "pointer",
+                background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
+                boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)",
+                animation: "fadeSlideUp 0.5s ease 0.3s both",
+              }}>See My Results</button>
             </div>
           )}
         </div>
@@ -603,8 +610,8 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
       <div style={{ padding: "16px", background: "rgba(139,115,85,0.04)", borderRadius: 16, marginTop: 8, marginBottom: 8 }}>
         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: "#9A8E82", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10, textAlign: "center" }}>What Our Customers Say</div>
         {[
-          { quote: "I am 4 weeks in and my husband is remarking that I look years younger.", name: "Denise", stars: 5 },
-          { quote: "My lips have changed so dramatically, even my husband noticed.", name: "Susan W.", stars: 5 },
+          { quote: "I'm 4 weeks in and the lines around my mouth are visibly smoother. I can't stop looking in the mirror!", name: "Denise R.", stars: 5 },
+          { quote: "I was skeptical at first, but the results are undeniable. My smile lines have softened beautifully.", name: "Patricia M.", stars: 5 },
         ].map((t, i) => (
           <div key={i} style={{ padding: "10px 14px", background: "white", borderRadius: 12, marginBottom: i === 0 ? 8 : 0, border: "1px solid #EDEAE5" }}>
             <div style={{ display: "flex", gap: 2, marginBottom: 4 }}>{Array(t.stars).fill(null).map((_, s) => <svg key={s} width="12" height="12" viewBox="0 0 14 14" fill="#C4A882"><path d="M7 1l1.8 3.6 4 .6-2.9 2.8.7 4L7 10.2 3.4 12l.7-4L1.2 5.2l4-.6L7 1z"/></svg>)}</div>
@@ -688,11 +695,11 @@ export default function AngelLiftQuiz() {
         input { font-size: 16px !important; }
         .qz { height: 100vh; height: 100dvh; }
         @media (min-width: 768px) {
-          .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-          .qz { max-width: 520px !important; height: auto !important; min-height: min(680px, 85vh) !important; max-height: 90vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.3s ease; }
+          .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+          .qz { max-width: 520px !important; height: auto !important; min-height: min(680px, 85vh) !important; max-height: 90vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.3s ease; margin-top: auto; margin-bottom: auto; }
           .qz-inner { height: auto !important; min-height: min(680px, 85vh); max-height: 90vh; }
-          .qz.qz-wide { max-width: 880px !important; max-height: none !important; }
-          .qz.qz-wide .qz-inner { max-height: none !important; overflow: visible !important; }
+          .qz.qz-wide { max-width: 880px !important; max-height: none !important; min-height: auto !important; height: auto !important; overflow: visible !important; }
+          .qz.qz-wide .qz-inner { max-height: none !important; min-height: auto !important; height: auto !important; overflow: visible !important; overflow-y: visible !important; }
           .results-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
           .results-footer { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; align-items: start; }
           .results-footer > * { margin-top: 0 !important; }
@@ -701,7 +708,7 @@ export default function AngelLiftQuiz() {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
-      <div className="qz-bg"><div className={`qz ${step === STEPS.RESULTS ? "qz-wide" : ""}`} style={{ maxWidth: 440, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="qz-bg"><div className={`qz ${step === STEPS.RESULTS ? "qz-wide" : ""}`} style={{ maxWidth: 440, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", overflow: step === STEPS.RESULTS ? "visible" : "hidden", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
         {step > STEPS.WELCOME && step < STEPS.RESULTS && (
           <>
             <ProgressBar step={step} total={4} />
