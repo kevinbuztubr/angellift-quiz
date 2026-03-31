@@ -135,7 +135,7 @@ function WelcomeStep({ onStart }) {
   return (
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      minHeight: "100%", padding: "40px 24px", textAlign: "center",
+      minHeight: "100%", padding: "40px 24px", paddingBottom: "env(safe-area-inset-bottom, 20px)", textAlign: "center",
       opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)",
       transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
@@ -185,7 +185,7 @@ function AreasStep({ selected, onToggle, onNext }) {
           return (
             <button key={area.id} onClick={() => onToggle(area.id)} style={{
               position: "relative", overflow: "hidden", borderRadius: 16, cursor: "pointer",
-              border: isSelected ? "3px solid #8B7355" : "3px solid transparent", padding: 0, background: "none", aspectRatio: "1",
+              border: isSelected ? "3px solid #8B7355" : "3px solid transparent", padding: 0, background: "none", aspectRatio: "1", minHeight: 150,
               transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
               transform: isSelected ? "scale(1.03)" : "scale(1)",
               boxShadow: isSelected ? "0 6px 24px rgba(139, 115, 85, 0.25)" : "0 2px 8px rgba(0,0,0,0.08)",
@@ -272,8 +272,8 @@ function PhotoStep({ onPhoto, onSkip }) {
     return (
       <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 400, textAlign: "center" }}>
         <div style={{ position: "relative", width: 120, height: 120, marginBottom: 32 }}>
-          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px solid #EDEAE5", borderTopColor: "#8B7355", animation: "spin 0.8s linear infinite" }} />
-          <div style={{ position: "absolute", inset: 12, borderRadius: "50%", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: "50%", border: "3px solid #EDEAE5", borderTopColor: "#8B7355", animation: "spin 0.8s linear infinite" }} />
+          <div style={{ position: "absolute", top: 12, left: 12, right: 12, bottom: 12, borderRadius: "50%", overflow: "hidden" }}>
             <img src={captured} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
@@ -336,9 +336,9 @@ function PhotoStep({ onPhoto, onSkip }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <div style={{ width: "100%", aspectRatio: "1", borderRadius: 20, overflow: "hidden", position: "relative", background: "#000" }}>
+          <div style={{ width: "100%", aspectRatio: "1", minHeight: 280, borderRadius: 20, overflow: "hidden", position: "relative", background: "#000" }}>
             <video ref={videoCallbackRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
-            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
+            <svg style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
               <defs><mask id="guideMask"><rect width="300" height="300" fill="white"/><ellipse cx="150" cy="155" rx="95" ry="75" fill="black"/></mask></defs>
               <rect width="300" height="300" fill="rgba(0,0,0,0.35)" mask="url(#guideMask)"/>
               <ellipse cx="150" cy="155" rx="95" ry="75" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeDasharray="8 4"/>
@@ -400,32 +400,6 @@ function SingleSelectStep({ stepNum, question, subtitle, options, selected, onSe
   );
 }
 
-) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
-  return (
-    <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
-      <div style={{ width: 64, height: 64, borderRadius: "50%", marginBottom: 24, background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>🎁</div>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: "#1A1612", lineHeight: 1.3, marginBottom: 8 }}>
-        Your results are <span style={{ fontStyle: "italic" }}>ready</span>
-      </h2>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
-        Enter your email to unlock your personalized recommendation and receive an exclusive discount.
-      </p>
-      <div style={{ width: "100%", maxWidth: 380, marginBottom: 12 }}>
-        <input type="email" value={email} onChange={e => onEmailChange(e.target.value)} placeholder="your@email.com"
-          style={{ width: "100%", padding: "16px 20px", border: "2px solid #EDEAE5", borderRadius: 14, fontFamily: "'DM Sans', sans-serif", fontSize: 17, color: "#1A1612", background: "#FAFAF7", outline: "none", transition: "border-color 0.3s ease", boxSizing: "border-box" }}
-          onFocus={e => e.target.style.borderColor = "#C4A882"} onBlur={e => e.target.style.borderColor = "#EDEAE5"} />
-      </div>
-      <button onClick={onSubmit} style={{ width: "100%", maxWidth: 380, padding: "16px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", marginBottom: 16 }}>View My Results</button>
-      <button onClick={onSkip} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B5D4F", textDecoration: "underline", textUnderlineOffset: 3 }}>Skip for now</button>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 24, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A8E82" }}>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5a2.5 2.5 0 00-2.5 2.5v2h-.25a.75.75 0 00-.75.75v3.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-3.5a.75.75 0 00-.75-.75H8.5V4A2.5 2.5 0 006 1.5zM4.5 4a1.5 1.5 0 013 0v2h-3V4z" fill="#C4BDB4"/></svg>
-        We respect your privacy. Unsubscribe anytime.
-      </div>
-    </div>
-  );
-}
 
 function StarRating({ rating }) {
   return (
@@ -512,9 +486,15 @@ function DiscountCapture() {
           fontFamily: "'DM Sans', sans-serif", fontSize: 28, fontWeight: 700, color: "#6B5D4F",
           background: "white", padding: "14px 24px", borderRadius: 12, margin: "12px 0",
           letterSpacing: "0.2em", border: "2px dashed #C4A882", display: "inline-block",
-          cursor: "pointer", userSelect: "all",
+          cursor: "pointer", userSelect: "all", WebkitUserSelect: "all",
         }}
-        onClick={() => { navigator.clipboard.writeText("MYANGELLIFT10"); setCopying(true); setTimeout(() => setCopying(false), 2000); }}
+        onClick={() => {
+          try { navigator.clipboard.writeText("MYANGELLIFT10"); } catch(e) {
+            const ta = document.createElement("textarea"); ta.value = "MYANGELLIFT10"; ta.style.position = "fixed"; ta.style.left = "-9999px";
+            document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+          }
+          setCopying(true); setTimeout(() => setCopying(false), 2000);
+        }}
         >
           {copying ? "✅ Copied!" : "MYANGELLIFT10"}
         </div>
@@ -560,16 +540,16 @@ function DiscountCapture() {
   );
 }
 
-function ResultsStep({ areas, solution, braces }) {
+function ResultsStep({ areas, solution, braces, onRetake }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
 
   const { primary, secondary, reason } = getRecommendations(areas, solution, braces);
 
   return (
-    <div style={{ padding: "32px 24px 100px", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+    <div style={{ padding: "32px 24px", paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}>
       <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: "#3D3428", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 20px", background: "linear-gradient(135deg, #F5EDE4, #EBE0D2)", borderRadius: 50, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#3D3428", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
           ✨ Your Personalized Results
         </div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 6vw, 38px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.3, marginBottom: 12 }}>
@@ -598,6 +578,10 @@ function ResultsStep({ areas, solution, braces }) {
           ✅ Clinically proven  ·  🇺🇸 Made in USA  ·  🌿 Hypoallergenic
         </div>
       </div>
+
+      <button onClick={onRetake} style={{ display: "block", margin: "24px auto 0", background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#9A8E82", textDecoration: "underline", textUnderlineOffset: 3, padding: "12px 20px" }}>
+        ← Retake Quiz
+      </button>
     </div>
   );
 }
@@ -617,21 +601,30 @@ export default function AngelLiftQuiz() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap');
+        /* fonts loaded in layout.js head */
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #C4A882; outline-offset: 2px; }
+        input { font-size: 16px !important; } /* prevent iOS zoom on input focus */
+        @supports not (height: 100dvh) { .quiz-shell { min-height: 100vh !important; } .quiz-scroll { height: 100vh !important; } }
+        @media (min-width: 768px) {
+          .quiz-desktop-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+          .quiz-shell { min-height: auto !important; height: auto !important; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; max-height: 90vh; overflow: hidden; }
+          .quiz-scroll { max-height: 90vh !important; }
+        }
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
-      <div style={{ maxWidth: 440, margin: "0 auto", minHeight: "100vh", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="quiz-desktop-bg"><div className="quiz-shell" style={{ maxWidth: 440, margin: "0 auto", width: "100%", minHeight: "100dvh", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
         {step > STEPS.WELCOME && step < STEPS.RESULTS && (
           <>
-            <ProgressBar step={step} total={6} />
-            <button onClick={() => goTo(step - 1)} style={{ position: "absolute", top: 12, left: 12, zIndex: 100, width: 40, height: 40, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.8)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <ProgressBar step={step} total={5} />
+            <button onClick={() => { if (step === STEPS.PHOTO) { /* camera cleanup handled by PhotoStep unmount */ } goTo(step - 1); }} aria-label="Go back" style={{ position: "absolute", top: 12, left: 12, zIndex: 100, width: 40, height: 40, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.8)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="#3D3428" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           </>
         )}
-        <div ref={containerRef} style={{ height: "100vh", overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: step === STEPS.WELCOME ? "center" : "flex-start", paddingTop: step > STEPS.WELCOME && step < STEPS.RESULTS ? 48 : 0 }}>
+        <div ref={containerRef} className="quiz-scroll" style={{ height: "100dvh", minHeight: "100vh", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", justifyContent: step === STEPS.WELCOME ? "center" : "flex-start", paddingTop: step > STEPS.WELCOME && step < STEPS.RESULTS ? 48 : 0 }}>
           {step === STEPS.WELCOME && <WelcomeStep onStart={() => goTo(STEPS.AREAS)} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.PHOTO)} />}
           {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.CURRENT_SOLUTION); }} onSkip={() => goTo(STEPS.CURRENT_SOLUTION)} />}
@@ -650,9 +643,9 @@ export default function AngelLiftQuiz() {
               ]}
               selected={braces} onSelect={setBraces} onNext={() => goTo(STEPS.RESULTS)} />
           )}
-          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} />}
+          {step === STEPS.RESULTS && <ResultsStep areas={areas} solution={solution} braces={braces} onRetake={() => { setAreas([]); setSolution(null); setBraces(null); setPhoto(null); goTo(STEPS.WELCOME); }} />}
         </div>
-      </div>
+      </div></div>
     </>
   );
 }
