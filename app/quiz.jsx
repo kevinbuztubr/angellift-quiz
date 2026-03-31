@@ -26,7 +26,7 @@ const SOLUTIONS = [
 const PRODUCTS = {
   original: {
     id: "original", name: "AngelLift® Original DermaStrips", subtitle: "Original",
-    price: "$79.99", liftForce: "0.024N", slug: "starter",
+    price: "$79.99", liftForce: "0.024N", slug: "starter", variantId: "23239667587",
     image: "https://angellift.com/cdn/shop/files/Untitled_design_f2c2c35e-916b-4ad5-a1ac-e770547962f1_300x300.png?v=1774594386",
     tagline: "Gentle start to anti-aging care",
     features: ["Gentle lift for sensitive gums", "Ideal for fine lines & prevention", "Surgical-grade hydrogel", "Reusable — lasts 4–6 months"],
@@ -34,7 +34,7 @@ const PRODUCTS = {
   },
   collagen: {
     id: "collagen", name: "AngelLift® Collagen DermaStrips", subtitle: "Collagen",
-    price: "$99.00", liftForce: "0.024N", slug: "angellift-basic-collection",
+    price: "$99.00", liftForce: "0.024N", slug: "angellift-basic-collection", variantId: "31528996962398",
     image: "https://angellift.com/cdn/shop/files/Untitled_design_2_300x300.png?v=1774594385",
     tagline: "Enhanced collagen regeneration formula",
     features: ["Promotes active collagen regeneration", "Smooths lip lines & nasolabial folds", "Medical-grade hydrogel", "Reusable — lasts 4–6 months"],
@@ -42,7 +42,7 @@ const PRODUCTS = {
   },
   vermilion: {
     id: "vermilion", name: "AngelLift® Vermilion DermaStrips", subtitle: "Vermilion",
-    price: "$129.99", liftForce: "0.39N", slug: "vermilion-vital-kit",
+    price: "$129.99", liftForce: "0.39N", slug: "vermilion-vital-kit", variantId: "15920234004574",
     image: "https://angellift.com/cdn/shop/files/Untitled_design_3_119b50d8-2327-47c6-bdb9-a1ea19fe3d04_300x300.png?v=1774594385",
     tagline: "Targeted lip volume & vertical lift",
     features: ["Vertical lip lift technology", "Restores lip volume & definition", "Plumps thinning lips naturally", "Includes reshaping storage case"],
@@ -50,7 +50,7 @@ const PRODUCTS = {
   },
   professional: {
     id: "professional", name: "AngelLift® Professional DermaStrips", subtitle: "Professional",
-    price: "$159.99", liftForce: "0.52N", slug: "angellift-essentials-kit",
+    price: "$159.99", liftForce: "0.52N", slug: "angellift-essentials-kit", variantId: "44118992270",
     image: "https://angellift.com/cdn/shop/files/Untitled_design_1_300x300.png?v=1774594385",
     tagline: "Maximum correction for deeper lines",
     features: ["30% stronger lift than Original", "Professional-grade correction", "Targets deep wrinkles & folds", "Reusable — lasts 4–6 months"],
@@ -485,12 +485,21 @@ function ProductCard({ product, isPrimary, index, visible }) {
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#4A4340", background: "rgba(139,115,85,0.08)", padding: "4px 10px", borderRadius: 6, fontWeight: 600 }}>Lift: {product.liftForce}</div>
         </div>
 
-        <a href={`https://angellift.com/products/${product.slug}`} target="_blank" rel="noopener noreferrer" style={{
+        <a href={isPrimary ? `https://angellift.com/cart/${product.variantId}:1` : `https://angellift.com/cart/${product.variantId}:1`} target="_blank" rel="noopener noreferrer" style={{
           display: "block", width: "100%", padding: "18px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700,
           letterSpacing: "0.1em", textTransform: "uppercase", borderRadius: 50, cursor: "pointer", textAlign: "center", textDecoration: "none", boxSizing: "border-box",
           background: isPrimary ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent",
           color: isPrimary ? "#F5F0EB" : "#3D3428", border: isPrimary ? "none" : "2px solid #3D3428",
           boxShadow: isPrimary ? "0 4px 20px rgba(107, 93, 79, 0.25)" : "none",
+        }} onClick={() => {
+          try {
+            const msg = { product: product.name, variant: product.variantId, price: product.price, isPrimary };
+            if (window.parent !== window) {
+              window.parent.postMessage({ type: "meta_pixel", event: isPrimary ? "AddToCart" : "AddToCart", data: { content_name: product.name, content_ids: [product.variantId], value: parseFloat(product.price.replace("$","")), currency: "USD" }}, "*");
+              window.parent.postMessage({ type: "gtag_event", event: "add_to_cart", data: { currency: "USD", value: parseFloat(product.price.replace("$","")) }}, "*");
+              window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Product Clicked", data: msg }, "*");
+            }
+          } catch(e) {}
         }}>{isPrimary ? "Buy Now →" : "Add to Cart"}</a>
       </div>
     </div>
@@ -505,6 +514,14 @@ function DiscountCapture() {
   const handleSubmit = () => {
     if (email && email.includes("@")) {
       setSubmitted(true);
+      try {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "klaviyo_identify", data: { "$email": email }}, "*");
+          window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Discount Claimed", data: { email: email, discount_code: "START10" }}, "*");
+          window.parent.postMessage({ type: "meta_pixel", event: "Lead", data: { content_name: "Quiz Discount Capture" }}, "*");
+          window.parent.postMessage({ type: "gtag_event", event: "generate_lead", data: { currency: "USD", value: 0 }}, "*");
+        }
+      } catch(e) {}
     }
   };
 
@@ -522,14 +539,14 @@ function DiscountCapture() {
           cursor: "pointer", userSelect: "all", WebkitUserSelect: "all",
         }}
         onClick={() => {
-          try { navigator.clipboard.writeText("MYANGELLIFT10"); } catch(e) {
-            const ta = document.createElement("textarea"); ta.value = "MYANGELLIFT10"; ta.style.position = "fixed"; ta.style.left = "-9999px";
+          try { navigator.clipboard.writeText("START10"); } catch(e) {
+            const ta = document.createElement("textarea"); ta.value = "START10"; ta.style.position = "fixed"; ta.style.left = "-9999px";
             document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
           }
           setCopying(true); setTimeout(() => setCopying(false), 2000);
         }}
         >
-          {copying ? "✅ Copied!" : "MYANGELLIFT10"}
+          {copying ? "✅ Copied!" : "START10"}
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", marginTop: 8 }}>
           Tap the code to copy · Apply at checkout
@@ -598,13 +615,13 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "#FAFAF7", border: "1.5px solid #EDEAE5", borderRadius: 14, marginTop: 4, marginBottom: 4, animation: visible ? "fadeSlideUp 0.6s 0.6s both" : "none" }}>
         <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#F5EDE4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: 24 }}>🧼</span>
+          <img src="https://cdn.shopify.com/s/files/1/1363/8799/products/MetalBluecasew-STRIPOPEN-539889.png?v=1739977940" alt="Antimicrobial Case" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { e.target.style.display = "none"; e.target.parentElement.innerHTML = '<span style="font-size:24px">🧼</span>'; }} />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: "#1A1612" }}>Add: Antimicrobial Storage Case</div>
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F" }}>Most customers add this for hygienic daily use</div>
         </div>
-        <a href="https://angellift.com/collections/skin-care" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: "#8B7355", textDecoration: "none", whiteSpace: "nowrap" }}>+ Add</a>
+        <a href="https://angellift.com/cart/15965754097758:1" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: "#8B7355", textDecoration: "none", whiteSpace: "nowrap", padding: "8px 16px", background: "rgba(139,115,85,0.08)", borderRadius: 20 }}>+ Add $16.99</a>
       </div>
 
       <div style={{ padding: "16px", background: "rgba(139,115,85,0.04)", borderRadius: 16, marginTop: 8, marginBottom: 8 }}>
@@ -720,7 +737,13 @@ export default function AngelLiftQuiz() {
         )}
         <div ref={containerRef} className="qz-inner" style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: step === STEPS.RESULTS ? "auto" : "hidden", overflowX: "hidden", WebkitOverflowScrolling: "touch", position: "relative" }}>
           {step > STEPS.WELCOME && step < STEPS.RESULTS && <div style={{ height: 48, flexShrink: 0 }} />}
-          {step === STEPS.WELCOME && <WelcomeStep onStart={() => goTo(STEPS.AREAS)} />}
+          {step === STEPS.WELCOME && <WelcomeStep onStart={() => {
+            try { if (window.parent !== window) {
+              window.parent.postMessage({ type: "meta_pixel", event: "ViewContent", data: { content_name: "DermaStrip Quiz", content_category: "quiz" }}, "*");
+              window.parent.postMessage({ type: "gtag_event", event: "begin_checkout", data: { items: [{ item_name: "DermaStrip Quiz" }] }}, "*");
+            }} catch(e) {}
+            goTo(STEPS.AREAS);
+          }} />}
           {step === STEPS.AREAS && <AreasStep selected={areas} onToggle={toggleArea} onNext={() => goTo(STEPS.CURRENT_SOLUTION)} />}
           {step === STEPS.PHOTO && <PhotoStep onPhoto={(p) => { setPhoto(p); goTo(STEPS.RESULTS); }} onSkip={() => { setPhoto(null); goTo(STEPS.RESULTS); }} />}
           {step === STEPS.CURRENT_SOLUTION && (
