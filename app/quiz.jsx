@@ -615,7 +615,7 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "#FAFAF7", border: "1.5px solid #EDEAE5", borderRadius: 14, marginTop: 4, marginBottom: 4, animation: visible ? "fadeSlideUp 0.6s 0.6s both" : "none" }}>
         <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#F5EDE4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img src="https://cdn.shopify.com/s/files/1/1363/8799/products/MetalBluecasew-STRIPOPEN-539889.png?v=1739977940" alt="Antimicrobial Case" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { e.target.style.display = "none"; e.target.parentElement.innerHTML = '<span style="font-size:24px">🧼</span>'; }} />
+          <img src="https://cdn.shopify.com/s/files/1/1363/8799/products/MetalBluecasew-STRIPOPEN-539889.png?v=1739977940" alt="Antimicrobial Case" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { e.target.style.display = "none"; }} />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: "#1A1612" }}>Add: Antimicrobial Storage Case</div>
