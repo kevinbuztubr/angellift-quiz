@@ -485,7 +485,7 @@ function ProductCard({ product, isPrimary, index, visible }) {
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#4A4340", background: "rgba(139,115,85,0.08)", padding: "4px 10px", borderRadius: 6, fontWeight: 600 }}>Lift: {product.liftForce}</div>
         </div>
 
-        <a href={isPrimary ? `https://angellift.com/cart/${product.variantId}:1` : `https://angellift.com/cart/${product.variantId}:1`} target="_blank" rel="noopener noreferrer" style={{
+        <a href={isPrimary ? `https://angellift.com/cart/${product.variantId}:1` : `https://angellift.com/products/${product.slug}`} target="_blank" rel="noopener noreferrer" style={{
           display: "block", width: "100%", padding: "18px 32px", fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700,
           letterSpacing: "0.1em", textTransform: "uppercase", borderRadius: 50, cursor: "pointer", textAlign: "center", textDecoration: "none", boxSizing: "border-box",
           background: isPrimary ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent",
@@ -506,7 +506,7 @@ function ProductCard({ product, isPrimary, index, visible }) {
   );
 }
 
-function DiscountCapture() {
+function DiscountCapture({ quizData }) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [copying, setCopying] = useState(false);
@@ -515,10 +515,31 @@ function DiscountCapture() {
     if (email && email.includes("@")) {
       setSubmitted(true);
       try {
+        const qd = quizData || {};
+        const profileData = {
+          "$email": email,
+          "Quiz - Areas of Concern": Array.isArray(qd.areas) ? qd.areas.join(", ") : "",
+          "Quiz - Current Solution": qd.solution || "",
+          "Quiz - Had Braces": qd.braces || "",
+          "Quiz - Recommended Product": qd.recommended_primary || "",
+          "Quiz - Secondary Product": qd.recommended_secondary || "",
+          "Quiz - Completed": "Yes",
+          "Quiz - Discount Code": "START10",
+        };
         if (window.parent !== window) {
-          window.parent.postMessage({ type: "klaviyo_identify", data: { "$email": email }}, "*");
-          window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Discount Claimed", data: { email: email, discount_code: "START10" }}, "*");
-          window.parent.postMessage({ type: "meta_pixel", event: "Lead", data: { content_name: "Quiz Discount Capture" }}, "*");
+          window.parent.postMessage({ type: "klaviyo_identify", data: profileData }, "*");
+          window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Completed", data: {
+            areas: qd.areas,
+            current_solution: qd.solution,
+            had_braces: qd.braces,
+            recommended_product: qd.recommended_primary,
+            recommended_product_price: qd.recommended_primary_price,
+            recommended_product_variant: qd.recommended_primary_variant,
+            secondary_product: qd.recommended_secondary,
+            discount_code: "START10",
+            email: email,
+          }}, "*");
+          window.parent.postMessage({ type: "meta_pixel", event: "Lead", data: { content_name: "Quiz Discount Capture", content_category: qd.recommended_primary || "" }}, "*");
           window.parent.postMessage({ type: "gtag_event", event: "generate_lead", data: { currency: "USD", value: 0 }}, "*");
         }
       } catch(e) {}
@@ -592,7 +613,20 @@ function DiscountCapture() {
 
 function ResultsStep({ areas, solution, braces, onRetake }) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
+  useEffect(() => {
+    setTimeout(() => setVisible(true), 50);
+    try {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Results Viewed", data: {
+          areas: areas,
+          current_solution: solution,
+          had_braces: braces,
+        }}, "*");
+        window.parent.postMessage({ type: "meta_pixel", event: "ViewContent", data: { content_name: "Quiz Results", content_category: "quiz" }}, "*");
+        window.parent.postMessage({ type: "gtag_event", event: "view_item", data: { currency: "USD" }}, "*");
+      }
+    } catch(e) {}
+  }, []);
 
   const { primary, secondary, reason } = getRecommendations(areas, solution, braces);
 
@@ -621,7 +655,7 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: "#1A1612" }}>Add: Antimicrobial Storage Case</div>
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#6B5D4F" }}>Most customers add this for hygienic daily use</div>
         </div>
-        <a href="https://angellift.com/cart/15965754097758:1" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: "#8B7355", textDecoration: "none", whiteSpace: "nowrap", padding: "8px 16px", background: "rgba(139,115,85,0.08)", borderRadius: 20 }}>+ Add $16.99</a>
+        <a href="https://angellift.com/products/replacement-aluminum-mirrored-dermastrip-case" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: "#8B7355", textDecoration: "none", whiteSpace: "nowrap", padding: "8px 16px", background: "rgba(139,115,85,0.08)", borderRadius: 20 }}>+ Add $16.99</a>
       </div>
 
       <div style={{ padding: "16px", background: "rgba(139,115,85,0.04)", borderRadius: 16, marginTop: 8, marginBottom: 8 }}>
@@ -639,7 +673,7 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
       </div>
 
       <div className="results-footer" style={{ display: "flex", flexDirection: "column" }}>
-        <DiscountCapture />
+        <DiscountCapture quizData={{ areas, solution, braces, recommended_primary: primary.name, recommended_secondary: secondary.name, recommended_primary_price: primary.price, recommended_primary_variant: primary.variantId }} />
 
         <div style={{ marginTop: 20 }}>
           <div style={{ textAlign: "center", padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
