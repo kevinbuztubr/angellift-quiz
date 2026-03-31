@@ -562,28 +562,32 @@ function ResultsStep({ areas, solution, braces, onRetake }) {
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#4A4340", lineHeight: 1.7, maxWidth: 400, margin: "0 auto" }}>{reason}</p>
       </div>
 
-      <ProductCard product={primary} isPrimary={true} index={0} visible={visible} />
-      <ProductCard product={secondary} isPrimary={false} index={1} visible={visible} />
+      <div className="results-grid" style={{ display: "flex", flexDirection: "column" }}>
+        <ProductCard product={primary} isPrimary={true} index={0} visible={visible} />
+        <ProductCard product={secondary} isPrimary={false} index={1} visible={visible} />
+      </div>
 
+      <div className="results-footer" style={{ display: "flex", flexDirection: "column" }}>
+        <DiscountCapture />
 
-      <DiscountCapture />
-
-      <div style={{ textAlign: "center", marginTop: 20, padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#3D3428", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
-          💯 100% Money-Back Guarantee
-        </div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", lineHeight: 1.6 }}>
-          92% of users see visible results in 30 days. If you don’t, we’ll refund your purchase.
+        <div style={{ marginTop: 20 }}>
+          <div style={{ textAlign: "center", padding: "20px", background: "linear-gradient(135deg, #F5EDE4, #FBF7F2)", borderRadius: 16 }}>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#3D3428", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
+              💯 100% Money-Back Guarantee
+            </div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#4A4340", lineHeight: 1.6 }}>
+              92% of users see visible results in 30 days. If you don’t, we’ll refund your purchase.
+            </div>
+          </div>
+          <div style={{ textAlign: "center", marginTop: 12, padding: "14px", background: "rgba(139,115,85,0.04)", borderRadius: 12 }}>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", lineHeight: 1.5 }}>
+              ✅ Clinically proven  ·  🇺🇸 Made in USA  ·  🌿 Hypoallergenic
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style={{ textAlign: "center", marginTop: 12, padding: "14px", background: "rgba(139,115,85,0.04)", borderRadius: 12 }}>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B5D4F", lineHeight: 1.5 }}>
-          ✅ Clinically proven  ·  🇺🇸 Made in USA  ·  🌿 Hypoallergenic
-        </div>
-      </div>
-
-      <button onClick={onRetake} style={{ display: "block", margin: "24px auto 0", background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#9A8E82", textDecoration: "underline", textUnderlineOffset: 3, padding: "12px 20px" }}>
+      <button onClick={onRetake} style={{ display: "block", margin: "20px auto 0", background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#9A8E82", textDecoration: "underline", textUnderlineOffset: 3, padding: "12px 20px" }}>
         ← Retake Quiz
       </button>
     </div>
@@ -612,14 +616,18 @@ export default function AngelLiftQuiz() {
         .qz { height: 100vh; height: 100dvh; }
         @media (min-width: 768px) {
           .qz-bg { background: linear-gradient(135deg, #F5EDE4 0%, #EBE0D2 50%, #F5EDE4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-          .qz { max-width: 520px !important; height: auto !important; min-height: min(700px, 85vh) !important; max-height: 92vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; }
-          .qz-inner { height: auto !important; min-height: min(700px, 85vh); max-height: 92vh; }
+          .qz { max-width: 520px !important; height: auto !important; min-height: min(680px, 85vh) !important; max-height: 90vh; border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05) !important; transition: max-width 0.4s ease; }
+          .qz-inner { height: auto !important; min-height: min(680px, 85vh); max-height: 90vh; }
+          .qz.qz-wide { max-width: 880px !important; }
+          .results-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
+          .results-footer { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; align-items: start; }
+          .results-footer > * { margin-top: 0 !important; }
         }
         @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
-      <div className="qz-bg"><div className="qz" style={{ maxWidth: 440, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="qz-bg"><div className={`qz ${step === STEPS.RESULTS ? "qz-wide" : ""}`} style={{ maxWidth: 440, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "linear-gradient(180deg, #FDFCFA 0%, #F8F5F0 100%)", position: "relative", fontFamily: "'DM Sans', sans-serif" }}>
         {step > STEPS.WELCOME && step < STEPS.RESULTS && (
           <>
             <ProgressBar step={step} total={5} />
