@@ -219,6 +219,7 @@ function PhotoStep({ onPhoto, onSkip }) {
   const [visible, setVisible] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [captured, setCaptured] = useState(null);
+  const [badPhoto, setBadPhoto] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
   const videoRef = useRef(null);
@@ -231,6 +232,33 @@ function PhotoStep({ onPhoto, onSkip }) {
     "Matching optimal lift pressure…",
     "Building your recommendation…",
   ];
+
+  /* ── Basic skin detection (checks for skin-tone pixels) ── */
+  const hasSkinTones = (canvas) => {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    const centerX = Math.floor(w * 0.3);
+    const centerY = Math.floor(h * 0.3);
+    const sampleW = Math.floor(w * 0.4);
+    const sampleH = Math.floor(h * 0.4);
+    const data = ctx.getImageData(centerX, centerY, sampleW, sampleH).data;
+    let skinPixels = 0;
+    let totalPixels = 0;
+    for (let i = 0; i < data.length; i += 16) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      totalPixels++;
+      if (r > 60 && g > 40 && b > 20 &&
+          r > g && r > b &&
+          Math.abs(r - g) > 10 &&
+          r - b > 15 &&
+          !(r > 220 && g > 220 && b > 220) &&
+          !(r < 80 && g < 80 && b < 80)) {
+        skinPixels++;
+      }
+    }
+    return (skinPixels / totalPixels) > 0.15;
+  };
 
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
 
@@ -262,11 +290,13 @@ function PhotoStep({ onPhoto, onSkip }) {
     const sx = (video.videoWidth - size) / 2; const sy = (video.videoHeight - size) / 2;
     ctx.translate(size, 0); ctx.scale(-1, 1);
     ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    const isSkin = hasSkinTones(canvas);
     setCaptured(canvas.toDataURL("image/jpeg", 0.8));
+    setBadPhoto(!isSkin);
     stopCamera(); setCameraActive(false);
   };
 
-  const retake = () => { setCaptured(null); startCamera(); };
+  const retake = () => { setCaptured(null); setBadPhoto(false); startCamera(); };
 
   const confirm = () => {
     setAnalyzing(true); setAnalysisStep(0);
@@ -328,15 +358,24 @@ function PhotoStep({ onPhoto, onSkip }) {
       <div style={{ padding: "4px 20px 16px", flex: 1, display: "flex", flexDirection: "column", opacity: visible ? 1 : 0, transition: "all 0.6s ease" }}>
         <StepIndicator current={4} total={4} />
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 400, color: "#1A1612", lineHeight: 1.2, margin: "8px 0 12px" }}>
-          Looking <span style={{ fontStyle: "italic" }}>great</span>!
+          {badPhoto ? <>Let's try <span style={{ fontStyle: "italic" }}>again</span></> : <>Looking <span style={{ fontStyle: "italic" }}>great</span>!</>}
         </h2>
-        <div style={{ borderRadius: 16, overflow: "hidden", marginBottom: 12, flex: 1, minHeight: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+        {badPhoto && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "10px 14px", background: "rgba(226,75,74,0.06)", borderRadius: 10, border: "1.5px solid rgba(226,75,74,0.15)" }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}><circle cx="8" cy="8" r="7" fill="#E24B4A" fillOpacity="0.15"/><path d="M8 4.5v4M8 10.5v.5" stroke="#E24B4A" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#993D3D", fontWeight: 500 }}>We couldn't detect a face. Please retake with just the lower half of your face visible.</span>
+          </div>
+        )}
+        <div style={{ borderRadius: 16, overflow: "hidden", marginBottom: 12, flex: 1, minHeight: 0, boxShadow: badPhoto ? "0 0 0 3px rgba(226,75,74,0.3)" : "0 4px 20px rgba(0,0,0,0.1)" }}>
           <img src={captured} alt="Your photo" style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} />
         </div>
         <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={retake} style={{ flex: 1, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, border: "2px solid #6B5D4F", borderRadius: 50, cursor: "pointer", background: "transparent", color: "#3D3428" }}>Retake</button>
-          <button onClick={confirm} style={{ flex: 2, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)" }}>Use This Photo</button>
+          <button onClick={retake} style={{ flex: badPhoto ? 1 : 1, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, border: "2px solid #6B5D4F", borderRadius: 50, cursor: "pointer", background: badPhoto ? "linear-gradient(135deg, #6B5D4F, #8B7355)" : "transparent", color: badPhoto ? "#F5F0EB" : "#3D3428" }}>{badPhoto ? "Retake Photo" : "Retake"}</button>
+          {!badPhoto && <button onClick={confirm} style={{ flex: 2, padding: "16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", borderRadius: 50, cursor: "pointer", background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB", boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)" }}>Use This Photo</button>}
         </div>
+        {badPhoto && (
+          <button onClick={onSkip} style={{ marginTop: 10, padding: "12px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#6B5D4F", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>Skip This Step</button>
+        )}
       </div>
     );
   }
