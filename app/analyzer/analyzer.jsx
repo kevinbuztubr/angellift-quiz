@@ -367,13 +367,14 @@ export default function SkinAnalyzer() {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .az-container { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: transparent; max-width: 780px; margin: 0 auto; padding: 0 16px; }
-        .az-widget { display: flex; gap: 20px; min-height: 340px; }
-        .az-left { flex: 1; background: #1A1612; border-radius: 16px; overflow: hidden; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 340px; }
+        .az-container { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: transparent; max-width: 780px; margin: 0 auto; padding: 0 16px 20px; }
+        .az-widget { display: flex; gap: 20px; min-height: 440px; }
+        .az-left { flex: 1; background: #1A1612; border-radius: 16px; overflow: hidden; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 440px; }
         .az-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         @media (max-width: 640px) {
           .az-widget { flex-direction: column; gap: 16px; }
-          .az-left { min-height: 280px; }
+          .az-left { min-height: 360px; }
+          .az-container { padding-bottom: 80px; }
         }
       `}</style>
 
@@ -401,15 +402,15 @@ export default function SkinAnalyzer() {
                 <video ref={videoCallbackRef} autoPlay playsInline muted style={{
                   position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)",
                 }} />
-                <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 300">
-                  <defs><mask id="gm"><rect width="300" height="300" fill="white"/><ellipse cx="150" cy="150" rx="90" ry="72" fill="black"/></mask></defs>
-                  <rect width="300" height="300" fill="rgba(0,0,0,0.35)" mask="url(#gm)"/>
-                  <ellipse cx="150" cy="150" rx="90" ry="72" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="8 4"/>
-                  <text x="150" y="248" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="12" fontFamily="sans-serif">Align your mouth area</text>
+                <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 340">
+                  <defs><mask id="gm"><rect width="300" height="340" fill="white"/><ellipse cx="150" cy="140" rx="90" ry="72" fill="black"/></mask></defs>
+                  <rect width="300" height="340" fill="rgba(0,0,0,0.35)" mask="url(#gm)"/>
+                  <ellipse cx="150" cy="140" rx="90" ry="72" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="8 4"/>
+                  <text x="150" y="220" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="12" fontFamily="sans-serif">Align your mouth area</text>
                 </svg>
                 <button onClick={takePhoto} style={{
-                  position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", zIndex: 10,
-                  width: 64, height: 64, borderRadius: "50%", border: "4px solid #C4A882", background: "white",
+                  position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 10,
+                  width: 60, height: 60, borderRadius: "50%", border: "4px solid #C4A882", background: "white",
                   cursor: "pointer", padding: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
