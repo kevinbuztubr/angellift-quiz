@@ -402,15 +402,15 @@ export default function SkinAnalyzer() {
                 <video ref={videoCallbackRef} autoPlay playsInline muted style={{
                   position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)",
                 }} />
-                <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 340">
-                  <defs><mask id="gm"><rect width="300" height="340" fill="white"/><ellipse cx="150" cy="140" rx="90" ry="72" fill="black"/></mask></defs>
-                  <rect width="300" height="340" fill="rgba(0,0,0,0.35)" mask="url(#gm)"/>
-                  <ellipse cx="150" cy="140" rx="90" ry="72" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="8 4"/>
-                  <text x="150" y="220" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="12" fontFamily="sans-serif">Align your mouth area</text>
+                <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 300 400">
+                  <defs><mask id="gm"><rect width="300" height="400" fill="white"/><ellipse cx="150" cy="150" rx="90" ry="72" fill="black"/></mask></defs>
+                  <rect width="300" height="400" fill="rgba(0,0,0,0.35)" mask="url(#gm)"/>
+                  <ellipse cx="150" cy="150" rx="90" ry="72" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="8 4"/>
+                  <text x="150" y="248" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="12" fontFamily="sans-serif">Align your mouth area</text>
                 </svg>
                 <button onClick={takePhoto} style={{
-                  position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 10,
-                  width: 60, height: 60, borderRadius: "50%", border: "4px solid #C4A882", background: "white",
+                  position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 10,
+                  width: 56, height: 56, borderRadius: "50%", border: "4px solid #C4A882", background: "white",
                   cursor: "pointer", padding: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
