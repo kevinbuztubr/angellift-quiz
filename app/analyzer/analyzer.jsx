@@ -367,13 +367,13 @@ export default function SkinAnalyzer() {
                     <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(139,115,85,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </div>
-                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>3-second skin scan</div>
+                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>How it works</div>
                     <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
-                      Snap a quick photo of your mouth area. Our AI will analyze your skin and recommend the perfect DermaStrip.
+                      Take a quick selfie of your lower face. Our AI analyzes your skin and tells you exactly which DermaStrip to start with.
                     </div>
                     <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 12, color: "#9A8E82" }}>
-                      <span>✅ Clinically proven</span>
-                      <span>🦈 Shark Tank Winner</span>
+                      <span>✅ Takes 10 seconds</span>
+                      <span>🔒 Photo never stored</span>
                     </div>
                   </div>
                 )}
