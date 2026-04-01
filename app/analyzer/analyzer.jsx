@@ -141,11 +141,39 @@ export default function SkinAnalyzer() {
       });
       streamRef.current = stream;
       setPhase("camera");
-      fireEvent("klaviyo_track", "Analyzer Camera Opened", {});
-      fireEvent("meta_pixel", "ViewContent", { content_name: "Skin Analyzer", content_category: "analyzer" });
+      fireEvent("klaviyo_track", "Quiz Photo Taken", { photo_used: true, source: "analyzer" });
+      fireEvent("meta_pixel", "ViewContent", { content_name: "DermaStrip Quiz", content_category: "quiz" });
     } catch (err) {
       alert("Could not access camera. Please check your browser permissions.");
     }
+  };
+
+  /* ── Basic skin detection (checks for skin-tone pixels) ── */
+  const hasSkinTones = (canvas) => {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    const centerX = Math.floor(w * 0.3);
+    const centerY = Math.floor(h * 0.3);
+    const sampleW = Math.floor(w * 0.4);
+    const sampleH = Math.floor(h * 0.4);
+    const data = ctx.getImageData(centerX, centerY, sampleW, sampleH).data;
+    let skinPixels = 0;
+    let totalPixels = 0;
+    for (let i = 0; i < data.length; i += 16) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      totalPixels++;
+      // Broad skin tone detection across all ethnicities
+      if (r > 60 && g > 40 && b > 20 &&
+          r > g && r > b &&
+          Math.abs(r - g) > 10 &&
+          r - b > 15 &&
+          !(r > 220 && g > 220 && b > 220) && // not pure white
+          !(r < 80 && g < 80 && b < 80)) { // not pure black/dark
+        skinPixels++;
+      }
+    }
+    return (skinPixels / totalPixels) > 0.15; // at least 15% skin-like pixels
   };
 
   const takePhoto = () => {
@@ -163,10 +191,18 @@ export default function SkinAnalyzer() {
     ctx.scale(-1, 1);
     ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
 
+    const isSkin = hasSkinTones(canvas);
     setCaptured(canvas.toDataURL("image/jpeg", 0.7));
     stopCamera();
 
-    // Start analysis
+    if (!isSkin) {
+      setPhase("bad_photo");
+    } else {
+      setPhase("captured");
+    }
+  };
+
+  const confirmPhoto = () => {
     setPhase("analyzing");
     setAnalysisStep(0);
 
@@ -178,9 +214,13 @@ export default function SkinAnalyzer() {
     }, 1200);
     setTimeout(() => {
       setAnalysisStep(2);
-      // Show concern selector at step 2
       setPhase("choosing");
     }, 2400);
+  };
+
+  const retakePhoto = () => {
+    setCaptured(null);
+    startCamera();
   };
 
   const selectConcern = (id) => {
@@ -193,14 +233,19 @@ export default function SkinAnalyzer() {
       setProduct(rec);
       setFakeMetrics(m => ({ ...m, lift: rec.liftForce, confidence: "98%" }));
 
-      fireEvent("klaviyo_track", "Analyzer Result Viewed", {
+      fireEvent("klaviyo_track", "Quiz Results Viewed", {
+        areas: [id],
+        current_solution: "",
+        had_braces: "",
+        source: "analyzer",
         concern: id,
         recommended_product: rec.name,
         recommended_product_price: rec.price,
         recommended_product_variant: rec.variantId,
       });
       fireEvent("meta_pixel", "ViewContent", {
-        content_name: "Analyzer Result",
+        content_name: "Quiz Results",
+        content_category: "quiz",
         content_ids: [rec.variantId],
         value: parseFloat(rec.price.replace("$", "")),
         currency: "USD",
@@ -222,10 +267,12 @@ export default function SkinAnalyzer() {
       currency: "USD",
       value: parseFloat(product.price.replace("$", "")),
     });
-    fireEvent("klaviyo_track", "Analyzer Product Clicked", {
+    fireEvent("klaviyo_track", "Quiz Product Clicked", {
       product: product.name,
       variant: product.variantId,
       price: product.price,
+      isPrimary: true,
+      source: "analyzer",
       concern: concern,
     });
   };
@@ -234,24 +281,35 @@ export default function SkinAnalyzer() {
     if (!email || !email.includes("@")) return;
     setEmailSubmitted(true);
     try {
+      const rec = RECOMMENDATIONS[concern] || RECOMMENDATIONS.marionette;
+      const secondaryProduct = PRODUCTS[rec.secondary];
       const profileData = {
         "$email": email,
-        "Analyzer - Concern": concern || "",
-        "Analyzer - Recommended Product": product ? product.name : "",
-        "Analyzer - Completed": "Yes",
-        "Analyzer - Discount Code": "START10",
+        "Quiz - Areas of Concern": concern || "",
+        "Quiz - Current Solution": "",
+        "Quiz - Had Braces": "",
+        "Quiz - Recommended Product": product ? product.name : "",
+        "Quiz - Secondary Product": secondaryProduct ? secondaryProduct.name : "",
+        "Quiz - Completed": "Yes",
+        "Quiz - Used Camera": "Yes",
+        "Quiz - Discount Code": "START10",
       };
       if (window.parent !== window) {
         window.parent.postMessage({ type: "klaviyo_identify", data: profileData }, "*");
-        window.parent.postMessage({ type: "klaviyo_track", event: "Analyzer Completed", data: {
-          concern: concern,
+        window.parent.postMessage({ type: "klaviyo_track", event: "Quiz Completed", data: {
+          areas: [concern],
+          current_solution: "",
+          had_braces: "",
           recommended_product: product ? product.name : "",
           recommended_product_price: product ? product.price : "",
           recommended_product_variant: product ? product.variantId : "",
+          secondary_product: secondaryProduct ? secondaryProduct.name : "",
+          photo_used: true,
           discount_code: "START10",
           email: email,
+          source: "analyzer",
         }}, "*");
-        window.parent.postMessage({ type: "meta_pixel", event: "Lead", data: { content_name: "Analyzer Discount Capture", content_category: concern || "" }}, "*");
+        window.parent.postMessage({ type: "meta_pixel", event: "Lead", data: { content_name: "Quiz Discount Capture", content_category: concern || "" }}, "*");
         window.parent.postMessage({ type: "gtag_event", event: "generate_lead", data: { currency: "USD", value: 0 }}, "*");
       }
     } catch (e) {}
@@ -345,18 +403,18 @@ export default function SkinAnalyzer() {
               </>
             )}
 
-            {(phase === "analyzing" || phase === "choosing" || phase === "result") && (
+            {(phase === "captured" || phase === "bad_photo" || phase === "analyzing" || phase === "choosing" || phase === "result") && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: 20, textAlign: "center", width: "100%" }}>
                 {/* Scanning circle */}
                 <div style={{ width: 120, height: 96, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {phase !== "result" && (
+                  {(phase === "analyzing" || phase === "choosing") && (
                     <div style={{ position: "absolute", inset: -6, borderRadius: "50%", border: "2px solid transparent", borderTopColor: "#C4A882", animation: "spin 0.8s linear infinite" }} />
                   )}
                   <div style={{
                     width: 120, height: 96, borderRadius: "50%", overflow: "hidden",
-                    border: phase === "result" ? "2px solid #C4A882" : "2px solid rgba(196,168,130,0.4)",
+                    border: phase === "result" ? "2px solid #C4A882" : phase === "bad_photo" ? "2px solid #E24B4A" : "2px solid rgba(196,168,130,0.4)",
                   }}>
-                    {captured && <img src={captured} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }} />}
+                    {captured && <img src={captured} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: phase === "captured" ? 1 : 0.6 }} />}
                   </div>
                   {phase === "result" && (
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -366,10 +424,26 @@ export default function SkinAnalyzer() {
                       </svg>
                     </div>
                   )}
+                  {phase === "bad_photo" && (
+                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="14" fill="rgba(0,0,0,0.4)"/>
+                        <path d="M11 11l10 10M21 11l-10 10" stroke="#E24B4A" strokeWidth="2.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                  )}
                 </div>
 
                 {/* Status text */}
-                {phase !== "result" ? (
+                {phase === "captured" && (
+                  <div style={{ color: "#C4A882", fontSize: 14, fontWeight: 500 }}>Photo captured</div>
+                )}
+                {phase === "bad_photo" && (
+                  <div style={{ color: "#E24B4A", fontSize: 13, fontWeight: 500, textAlign: "center", lineHeight: 1.4 }}>
+                    We couldn't detect a face.<br/>Please try again.
+                  </div>
+                )}
+                {(phase === "analyzing" || phase === "choosing") && (
                   <>
                     <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, animation: "pulse 1.2s ease infinite" }}>
                       {ANALYSIS_STEPS[Math.min(analysisStep, 3)]}
@@ -384,7 +458,8 @@ export default function SkinAnalyzer() {
                       ))}
                     </div>
                   </>
-                ) : (
+                )}
+                {phase === "result" && (
                   <>
                     <div style={{ color: "#C4A882", fontSize: 14, fontWeight: 600 }}>Analysis complete</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
@@ -427,6 +502,43 @@ export default function SkinAnalyzer() {
                   Position your mouth area inside the oval guide and tap the shutter button.
                 </div>
                 <div style={{ fontSize: 13, color: "#9A8E82", marginTop: 4 }}>Just the lower half of your face — nose to chin</div>
+              </div>
+            )}
+
+            {/* Photo captured: confirm or retake */}
+            {phase === "captured" && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: 24, textAlign: "center", animation: "fadeIn 0.4s ease" }}>
+                <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Looking great!</div>
+                <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
+                  Make sure your mouth area is clearly visible. Ready to analyze?
+                </div>
+                <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 280 }}>
+                  <button onClick={retakePhoto} style={{
+                    flex: 1, padding: "14px 16px", border: "2px solid #6B5D4F", borderRadius: 50,
+                    background: "transparent", color: "#3D3428", fontSize: 14, fontWeight: 600,
+                    cursor: "pointer",
+                  }}>Retake</button>
+                  <button onClick={confirmPhoto} style={{
+                    flex: 2, padding: "14px 16px", border: "none", borderRadius: 50,
+                    background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 600,
+                    letterSpacing: "0.5px", cursor: "pointer",
+                  }}>Analyze My Skin</button>
+                </div>
+              </div>
+            )}
+
+            {/* Bad photo: couldn't detect face */}
+            {phase === "bad_photo" && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: 24, textAlign: "center", animation: "fadeIn 0.4s ease" }}>
+                <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Let's try that again</div>
+                <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
+                  We couldn't detect skin in the photo. Make sure to capture just the lower half of your face — nose to chin.
+                </div>
+                <button onClick={retakePhoto} style={{
+                  padding: "14px 32px", border: "none", borderRadius: 50,
+                  background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 600,
+                  letterSpacing: "0.5px", cursor: "pointer", width: "100%", maxWidth: 280,
+                }}>Try Again</button>
               </div>
             )}
 
