@@ -238,26 +238,37 @@ function PhotoStep({ onPhoto, onSkip }) {
     const ctx = canvas.getContext("2d");
     const w = canvas.width;
     const h = canvas.height;
-    const centerX = Math.floor(w * 0.3);
-    const centerY = Math.floor(h * 0.3);
-    const sampleW = Math.floor(w * 0.4);
-    const sampleH = Math.floor(h * 0.4);
+    const centerX = Math.floor(w * 0.25);
+    const centerY = Math.floor(h * 0.25);
+    const sampleW = Math.floor(w * 0.5);
+    const sampleH = Math.floor(h * 0.5);
     const data = ctx.getImageData(centerX, centerY, sampleW, sampleH).data;
     let skinPixels = 0;
     let totalPixels = 0;
+    const brightnesses = [];
+    const redValues = [];
     for (let i = 0; i < data.length; i += 16) {
       const r = data[i], g = data[i+1], b = data[i+2];
       totalPixels++;
+      brightnesses.push((r + g + b) / 3);
+      redValues.push(r);
       if (r > 60 && g > 40 && b > 20 &&
           r > g && r > b &&
-          Math.abs(r - g) > 10 &&
-          r - b > 15 &&
+          Math.abs(r - g) > 12 &&
+          r - b > 20 &&
           !(r > 220 && g > 220 && b > 220) &&
-          !(r < 80 && g < 80 && b < 80)) {
+          !(r < 70 && g < 70 && b < 70)) {
         skinPixels++;
       }
     }
-    return (skinPixels / totalPixels) > 0.15;
+    const skinRatio = skinPixels / totalPixels;
+    const avgBright = brightnesses.reduce((a, b) => a + b, 0) / brightnesses.length;
+    const variance = brightnesses.reduce((sum, b) => sum + Math.pow(b - avgBright, 2), 0) / brightnesses.length;
+    const stdDev = Math.sqrt(variance);
+    const minRed = Math.min(...redValues);
+    const maxRed = Math.max(...redValues);
+    const redRange = maxRed - minRed;
+    return skinRatio > 0.15 && stdDev > 15 && redRange > 40;
   };
 
   useEffect(() => { setTimeout(() => setVisible(true), 50); }, []);
