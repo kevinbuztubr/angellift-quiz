@@ -355,8 +355,245 @@ export default function SkinAnalyzer() {
     };
     sendHeight();
     const interval = setInterval(sendHeight, 500);
+
     return () => clearInterval(interval);
   }, [phase, product]);
+
+  const rightContent = (
+    <>
+                {/* Ready state: explainer */}
+                {phase === "ready" && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 24, textAlign: "center" }}>
+                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(139,115,85,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </div>
+                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>3-second skin scan</div>
+                    <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
+                      Snap a quick photo of your mouth area. Our AI will analyze your skin and recommend the perfect DermaStrip.
+                    </div>
+                    <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 12, color: "#9A8E82" }}>
+                      <span>✅ Clinically proven</span>
+                      <span>🦈 Shark Tank Winner</span>
+                    </div>
+                  </div>
+                )}
+    
+                {/* Camera active: guidance */}
+                {phase === "camera" && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 24, textAlign: "center" }}>
+                    <div style={{ fontSize: 18, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Almost there...</div>
+                    <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 220 }}>
+                      Position your mouth area inside the oval guide and tap the shutter button.
+                    </div>
+                    <div style={{ fontSize: 13, color: "#9A8E82", marginTop: 4 }}>Just the lower half of your face — nose to chin</div>
+                  </div>
+                )}
+    
+                {/* Photo captured: confirm or retake */}
+                {phase === "captured" && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: 24, textAlign: "center", animation: "fadeIn 0.4s ease" }}>
+                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Looking great!</div>
+                    <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
+                      Make sure your mouth area is clearly visible. Ready to analyze?
+                    </div>
+                    <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 280 }}>
+                      <button onClick={retakePhoto} style={{
+                        flex: 1, padding: "14px 16px", border: "2px solid #6B5D4F", borderRadius: 50,
+                        background: "transparent", color: "#3D3428", fontSize: 14, fontWeight: 600,
+                        cursor: "pointer",
+                      }}>Retake</button>
+                      <button onClick={confirmPhoto} style={{
+                        flex: 2, padding: "14px 16px", border: "none", borderRadius: 50,
+                        background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 600,
+                        letterSpacing: "0.5px", cursor: "pointer",
+                      }}>Analyze My Skin</button>
+                    </div>
+                  </div>
+                )}
+    
+                {/* Bad photo: couldn't detect face */}
+                {phase === "bad_photo" && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: 24, textAlign: "center", animation: "fadeIn 0.4s ease" }}>
+                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Let's try that again</div>
+                    <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
+                      We couldn't detect skin in the photo. Make sure to capture just the lower half of your face — nose to chin.
+                    </div>
+                    <button onClick={retakePhoto} style={{
+                      padding: "14px 32px", border: "none", borderRadius: 50,
+                      background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 600,
+                      letterSpacing: "0.5px", cursor: "pointer", width: "100%", maxWidth: 280,
+                    }}>Try Again</button>
+                  </div>
+                )}
+    
+                {/* Analyzing (early): fake metrics appearing */}
+                {phase === "analyzing" && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 24, textAlign: "center", animation: "fadeIn 0.5s ease" }}>
+                    <div style={{ fontSize: 16, color: "#3D3428", fontWeight: 500 }}>Analyzing your photo...</div>
+                    <div style={{ fontSize: 13, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
+                      Our AI is examining skin depth, elasticity, and line patterns to find your ideal lift strength.
+                    </div>
+                    {Object.keys(fakeMetrics).length > 0 && (
+                      <div style={{ marginTop: 8, padding: "12px 16px", background: "rgba(139,115,85,0.06)", borderRadius: 12, width: "100%", maxWidth: 240 }}>
+                        <div style={{ fontSize: 11, color: "#9A8E82", marginBottom: 4, fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>Detected so far:</div>
+                        {Object.entries(fakeMetrics).map(([k, v]) => (
+                          <div key={k} style={{ fontSize: 14, color: "#3D3428", padding: "2px 0", textTransform: "capitalize" }}>{k}: {v}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+    
+                {/* Choosing: concern selector */}
+                {phase === "choosing" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "16px 20px", width: "100%", animation: "fadeIn 0.5s ease" }}>
+                    <div style={{ fontSize: 14, color: "#8B7355", fontWeight: 600 }}>One quick question to refine your results:</div>
+                    <div style={{ fontSize: 17, color: "#1A1612", fontWeight: 500, marginBottom: 4 }}>What's your primary concern?</div>
+                    {CONCERNS.map(c => (
+                      <button key={c.id} onClick={() => selectConcern(c.id)} style={{
+                        display: "flex", alignItems: "center", gap: 12, padding: "12px 14px",
+                        background: concern === c.id ? "rgba(139,115,85,0.08)" : "#FAFAF7",
+                        border: concern === c.id ? "2px solid #C4A882" : "2px solid #EDEAE5",
+                        borderRadius: 12, cursor: "pointer", textAlign: "left", width: "100%",
+                        transition: "all 0.2s ease",
+                      }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: concern === c.id ? "rgba(139,115,85,0.12)" : "rgba(0,0,0,0.03)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{c.icon}</div>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1612" }}>{c.label}</div>
+                          <div style={{ fontSize: 12, color: "#6B5D4F" }}>{c.desc}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+    
+                {/* Result: product card */}
+                {phase === "result" && product && (
+                  <div style={{ width: "100%", animation: "fadeIn 0.6s ease" }}>
+                    <div style={{ border: "2px solid #C4A882", borderRadius: 16, overflow: "hidden", background: "#FAFAF7" }}>
+                      {/* Badge */}
+                      <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "10px 16px", textAlign: "center", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#F5F0EB" }}>
+                        ⭐ Your perfect match
+                      </div>
+    
+                      <div style={{ padding: "20px 18px" }}>
+                        {/* Product image + name */}
+                        <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 14 }}>
+                          <div style={{ width: 72, height: 72, borderRadius: 12, overflow: "hidden", background: "#F5EDE4", flexShrink: 0 }}>
+                            <img src={product.image} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 17, fontWeight: 600, color: "#1A1612", lineHeight: 1.25, fontFamily: "Georgia, serif" }}>{product.name}</div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                              <span style={{ fontSize: 12, color: "#D4A017", letterSpacing: "1px" }}>★★★★★</span>
+                              <span style={{ fontSize: 12, color: "#3D3428", fontWeight: 600 }}>4.8</span>
+                              <span style={{ fontSize: 11, color: "#6B5D4F" }}>· Shark Tank Winner</span>
+                            </div>
+                          </div>
+                        </div>
+    
+                        {/* Why this product */}
+                        <div style={{ fontSize: 13, color: "#4A4340", lineHeight: 1.6, marginBottom: 14, padding: "10px 12px", background: "rgba(139,115,85,0.04)", borderRadius: 10 }}>
+                          {REASONS[product.id]?.[concern] || product.tagline}
+                        </div>
+    
+                        {/* Features */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
+                          {product.features.map(f => (
+                            <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#3D3428" }}>
+                              <span style={{ color: "#4CAF50", fontWeight: 700, fontSize: 14 }}>✓</span> {f}
+                            </div>
+                          ))}
+                        </div>
+    
+                        {/* Price */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                          <span style={{ fontSize: 28, fontWeight: 700, color: "#1A1612" }}>{product.price}</span>
+                          <span style={{ fontSize: 11, color: "#8B7355", padding: "4px 8px", background: "rgba(139,115,85,0.08)", borderRadius: 6 }}>Lift: {product.liftForce}</span>
+                        </div>
+    
+                        {/* Buy Now */}
+                        <a href={`https://angellift.com/cart/${product.variantId}:1`} target="_blank" rel="noopener noreferrer"
+                          onClick={handleBuyNow}
+                          style={{
+                            display: "block", width: "100%", padding: "16px 24px", textAlign: "center", textDecoration: "none",
+                            background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
+                            fontSize: 15, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase",
+                            borderRadius: 50, boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", boxSizing: "border-box",
+                          }}>Buy Now →</a>
+    
+                        {/* Discount email capture */}
+                        {!emailSubmitted ? (
+                          <div style={{ marginTop: 16, padding: "16px", background: "linear-gradient(135deg, #FBF7F2, #F5EDE4)", borderRadius: 14, border: "1.5px solid #EDEAE5" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                              <span style={{ fontSize: 18 }}>🎁</span>
+                              <div>
+                                <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1612" }}>First time? Get 10% off</div>
+                                <div style={{ fontSize: 12, color: "#6B5D4F" }}>Enter your email for code <span style={{ color: "#C0392B", fontWeight: 600 }}>· expires tonight</span></div>
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
+                                onKeyDown={e => { if (e.key === "Enter") handleEmailSubmit(); }}
+                                style={{
+                                  flex: 1, padding: "12px 14px", border: "1.5px solid #EDEAE5", borderRadius: 12,
+                                  fontSize: 15, color: "#1A1612", background: "white", outline: "none",
+                                  boxSizing: "border-box", minWidth: 0, fontFamily: "inherit",
+                                }}
+                                onFocus={e => e.target.style.borderColor = "#C4A882"}
+                                onBlur={e => e.target.style.borderColor = "#EDEAE5"}
+                              />
+                              <button onClick={handleEmailSubmit} style={{
+                                padding: "12px 16px", border: "none", borderRadius: 12, cursor: "pointer",
+                                background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 700,
+                                whiteSpace: "nowrap", flexShrink: 0,
+                              }}>Get Code</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ marginTop: 16, padding: "16px", background: "linear-gradient(135deg, #F0EBE3, #E8DFD3)", borderRadius: 14, textAlign: "center", border: "2px solid #C4A882" }}>
+                            <div style={{ fontSize: 24, marginBottom: 6 }}>🎉</div>
+                            <div style={{ fontSize: 16, fontWeight: 600, color: "#1A1612", marginBottom: 8 }}>Your 10% discount code:</div>
+                            <div style={{
+                              fontSize: 24, fontWeight: 700, color: "#6B5D4F", background: "white",
+                              padding: "10px 20px", borderRadius: 10, letterSpacing: "0.15em",
+                              border: "2px dashed #C4A882", display: "inline-block", cursor: "pointer",
+                              userSelect: "all", WebkitUserSelect: "all",
+                            }}
+                            onClick={() => {
+                              try { navigator.clipboard.writeText("START10"); } catch(e) {
+                                const ta = document.createElement("textarea"); ta.value = "START10"; ta.style.position = "fixed"; ta.style.left = "-9999px";
+                                document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+                              }
+                              setCopying(true); setTimeout(() => setCopying(false), 2000);
+                            }}>
+                              {copying ? "✅ Copied!" : "START10"}
+                            </div>
+                            <div style={{ fontSize: 12, color: "#6B5D4F", marginTop: 8 }}>Tap to copy · Apply at checkout</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+    
+                    {/* Take full quiz link */}
+                    <div style={{ textAlign: "center", marginTop: 14 }}>
+                      <a href="https://angellift.com/pages/product-quiz" target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 13, color: "#8B7355", textDecoration: "underline", textUnderlineOffset: 3 }}>
+                        Want more detail? Take our full 60-second quiz →
+                      </a>
+                    </div>
+    
+                    {/* Retake */}
+                    <div style={{ textAlign: "center", marginTop: 8 }}>
+                      <button onClick={reset} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#9A8E82", textDecoration: "underline", textUnderlineOffset: 3, padding: "8px 16px" }}>
+                        Scan again
+                      </button>
+                    </div>
+                  </div>
+                )}
+    </>
+  );
+
 
   /* ── Render ── */
   return (
@@ -371,9 +608,12 @@ export default function SkinAnalyzer() {
         .az-widget { display: flex; gap: 20px; min-height: 440px; }
         .az-left { flex: 1; background: #1A1612; border-radius: 16px; overflow: hidden; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 440px; }
         .az-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .az-right-mobile { display: none; }
         @media (max-width: 640px) {
-          .az-widget { flex-direction: column; gap: 16px; }
-          .az-left { min-height: 360px; }
+          .az-widget { flex-direction: column; gap: 0; background: #1A1612; border-radius: 16px; overflow: hidden; }
+          .az-left { min-height: 300px; border-radius: 0; }
+          .az-right { display: none; }
+          .az-right-mobile { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
           .az-container { padding-bottom: 80px; }
         }
       `}</style>
@@ -492,238 +732,15 @@ export default function SkinAnalyzer() {
             )}
           </div>
 
-          {/* ── RIGHT SIDE ── */}
+          {/* ── RIGHT SIDE (desktop) ── */}
           <div className="az-right">
-            {/* Ready state: explainer */}
-            {phase === "ready" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 24, textAlign: "center" }}>
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(139,115,85,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                </div>
-                <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>3-second skin scan</div>
-                <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
-                  Snap a quick photo of your mouth area. Our AI will analyze your skin and recommend the perfect DermaStrip.
-                </div>
-                <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 12, color: "#9A8E82" }}>
-                  <span>✅ Clinically proven</span>
-                  <span>🦈 Shark Tank Winner</span>
-                </div>
-              </div>
-            )}
-
-            {/* Camera active: guidance */}
-            {phase === "camera" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 24, textAlign: "center" }}>
-                <div style={{ fontSize: 18, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Almost there...</div>
-                <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 220 }}>
-                  Position your mouth area inside the oval guide and tap the shutter button.
-                </div>
-                <div style={{ fontSize: 13, color: "#9A8E82", marginTop: 4 }}>Just the lower half of your face — nose to chin</div>
-              </div>
-            )}
-
-            {/* Photo captured: confirm or retake */}
-            {phase === "captured" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: 24, textAlign: "center", animation: "fadeIn 0.4s ease" }}>
-                <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Looking great!</div>
-                <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
-                  Make sure your mouth area is clearly visible. Ready to analyze?
-                </div>
-                <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 280 }}>
-                  <button onClick={retakePhoto} style={{
-                    flex: 1, padding: "14px 16px", border: "2px solid #6B5D4F", borderRadius: 50,
-                    background: "transparent", color: "#3D3428", fontSize: 14, fontWeight: 600,
-                    cursor: "pointer",
-                  }}>Retake</button>
-                  <button onClick={confirmPhoto} style={{
-                    flex: 2, padding: "14px 16px", border: "none", borderRadius: 50,
-                    background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 600,
-                    letterSpacing: "0.5px", cursor: "pointer",
-                  }}>Analyze My Skin</button>
-                </div>
-              </div>
-            )}
-
-            {/* Bad photo: couldn't detect face */}
-            {phase === "bad_photo" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: 24, textAlign: "center", animation: "fadeIn 0.4s ease" }}>
-                <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>Let's try that again</div>
-                <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
-                  We couldn't detect skin in the photo. Make sure to capture just the lower half of your face — nose to chin.
-                </div>
-                <button onClick={retakePhoto} style={{
-                  padding: "14px 32px", border: "none", borderRadius: 50,
-                  background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 600,
-                  letterSpacing: "0.5px", cursor: "pointer", width: "100%", maxWidth: 280,
-                }}>Try Again</button>
-              </div>
-            )}
-
-            {/* Analyzing (early): fake metrics appearing */}
-            {phase === "analyzing" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 24, textAlign: "center", animation: "fadeIn 0.5s ease" }}>
-                <div style={{ fontSize: 16, color: "#3D3428", fontWeight: 500 }}>Analyzing your photo...</div>
-                <div style={{ fontSize: 13, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
-                  Our AI is examining skin depth, elasticity, and line patterns to find your ideal lift strength.
-                </div>
-                {Object.keys(fakeMetrics).length > 0 && (
-                  <div style={{ marginTop: 8, padding: "12px 16px", background: "rgba(139,115,85,0.06)", borderRadius: 12, width: "100%", maxWidth: 240 }}>
-                    <div style={{ fontSize: 11, color: "#9A8E82", marginBottom: 4, fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>Detected so far:</div>
-                    {Object.entries(fakeMetrics).map(([k, v]) => (
-                      <div key={k} style={{ fontSize: 14, color: "#3D3428", padding: "2px 0", textTransform: "capitalize" }}>{k}: {v}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Choosing: concern selector */}
-            {phase === "choosing" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "16px 20px", width: "100%", animation: "fadeIn 0.5s ease" }}>
-                <div style={{ fontSize: 14, color: "#8B7355", fontWeight: 600 }}>One quick question to refine your results:</div>
-                <div style={{ fontSize: 17, color: "#1A1612", fontWeight: 500, marginBottom: 4 }}>What's your primary concern?</div>
-                {CONCERNS.map(c => (
-                  <button key={c.id} onClick={() => selectConcern(c.id)} style={{
-                    display: "flex", alignItems: "center", gap: 12, padding: "12px 14px",
-                    background: concern === c.id ? "rgba(139,115,85,0.08)" : "#FAFAF7",
-                    border: concern === c.id ? "2px solid #C4A882" : "2px solid #EDEAE5",
-                    borderRadius: 12, cursor: "pointer", textAlign: "left", width: "100%",
-                    transition: "all 0.2s ease",
-                  }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: concern === c.id ? "rgba(139,115,85,0.12)" : "rgba(0,0,0,0.03)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{c.icon}</div>
-                    <div>
-                      <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1612" }}>{c.label}</div>
-                      <div style={{ fontSize: 12, color: "#6B5D4F" }}>{c.desc}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Result: product card */}
-            {phase === "result" && product && (
-              <div style={{ width: "100%", animation: "fadeIn 0.6s ease" }}>
-                <div style={{ border: "2px solid #C4A882", borderRadius: 16, overflow: "hidden", background: "#FAFAF7" }}>
-                  {/* Badge */}
-                  <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "10px 16px", textAlign: "center", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#F5F0EB" }}>
-                    ⭐ Your perfect match
-                  </div>
-
-                  <div style={{ padding: "20px 18px" }}>
-                    {/* Product image + name */}
-                    <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 14 }}>
-                      <div style={{ width: 72, height: 72, borderRadius: 12, overflow: "hidden", background: "#F5EDE4", flexShrink: 0 }}>
-                        <img src={product.image} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 17, fontWeight: 600, color: "#1A1612", lineHeight: 1.25, fontFamily: "Georgia, serif" }}>{product.name}</div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-                          <span style={{ fontSize: 12, color: "#D4A017", letterSpacing: "1px" }}>★★★★★</span>
-                          <span style={{ fontSize: 12, color: "#3D3428", fontWeight: 600 }}>4.8</span>
-                          <span style={{ fontSize: 11, color: "#6B5D4F" }}>· Shark Tank Winner</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Why this product */}
-                    <div style={{ fontSize: 13, color: "#4A4340", lineHeight: 1.6, marginBottom: 14, padding: "10px 12px", background: "rgba(139,115,85,0.04)", borderRadius: 10 }}>
-                      {REASONS[product.id]?.[concern] || product.tagline}
-                    </div>
-
-                    {/* Features */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
-                      {product.features.map(f => (
-                        <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#3D3428" }}>
-                          <span style={{ color: "#4CAF50", fontWeight: 700, fontSize: 14 }}>✓</span> {f}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Price */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                      <span style={{ fontSize: 28, fontWeight: 700, color: "#1A1612" }}>{product.price}</span>
-                      <span style={{ fontSize: 11, color: "#8B7355", padding: "4px 8px", background: "rgba(139,115,85,0.08)", borderRadius: 6 }}>Lift: {product.liftForce}</span>
-                    </div>
-
-                    {/* Buy Now */}
-                    <a href={`https://angellift.com/cart/${product.variantId}:1`} target="_blank" rel="noopener noreferrer"
-                      onClick={handleBuyNow}
-                      style={{
-                        display: "block", width: "100%", padding: "16px 24px", textAlign: "center", textDecoration: "none",
-                        background: "linear-gradient(135deg, #6B5D4F, #8B7355)", color: "#F5F0EB",
-                        fontSize: 15, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase",
-                        borderRadius: 50, boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", boxSizing: "border-box",
-                      }}>Buy Now →</a>
-
-                    {/* Discount email capture */}
-                    {!emailSubmitted ? (
-                      <div style={{ marginTop: 16, padding: "16px", background: "linear-gradient(135deg, #FBF7F2, #F5EDE4)", borderRadius: 14, border: "1.5px solid #EDEAE5" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                          <span style={{ fontSize: 18 }}>🎁</span>
-                          <div>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1612" }}>First time? Get 10% off</div>
-                            <div style={{ fontSize: 12, color: "#6B5D4F" }}>Enter your email for code <span style={{ color: "#C0392B", fontWeight: 600 }}>· expires tonight</span></div>
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
-                            onKeyDown={e => { if (e.key === "Enter") handleEmailSubmit(); }}
-                            style={{
-                              flex: 1, padding: "12px 14px", border: "1.5px solid #EDEAE5", borderRadius: 12,
-                              fontSize: 15, color: "#1A1612", background: "white", outline: "none",
-                              boxSizing: "border-box", minWidth: 0, fontFamily: "inherit",
-                            }}
-                            onFocus={e => e.target.style.borderColor = "#C4A882"}
-                            onBlur={e => e.target.style.borderColor = "#EDEAE5"}
-                          />
-                          <button onClick={handleEmailSubmit} style={{
-                            padding: "12px 16px", border: "none", borderRadius: 12, cursor: "pointer",
-                            background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 700,
-                            whiteSpace: "nowrap", flexShrink: 0,
-                          }}>Get Code</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: 16, padding: "16px", background: "linear-gradient(135deg, #F0EBE3, #E8DFD3)", borderRadius: 14, textAlign: "center", border: "2px solid #C4A882" }}>
-                        <div style={{ fontSize: 24, marginBottom: 6 }}>🎉</div>
-                        <div style={{ fontSize: 16, fontWeight: 600, color: "#1A1612", marginBottom: 8 }}>Your 10% discount code:</div>
-                        <div style={{
-                          fontSize: 24, fontWeight: 700, color: "#6B5D4F", background: "white",
-                          padding: "10px 20px", borderRadius: 10, letterSpacing: "0.15em",
-                          border: "2px dashed #C4A882", display: "inline-block", cursor: "pointer",
-                          userSelect: "all", WebkitUserSelect: "all",
-                        }}
-                        onClick={() => {
-                          try { navigator.clipboard.writeText("START10"); } catch(e) {
-                            const ta = document.createElement("textarea"); ta.value = "START10"; ta.style.position = "fixed"; ta.style.left = "-9999px";
-                            document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
-                          }
-                          setCopying(true); setTimeout(() => setCopying(false), 2000);
-                        }}>
-                          {copying ? "✅ Copied!" : "START10"}
-                        </div>
-                        <div style={{ fontSize: 12, color: "#6B5D4F", marginTop: 8 }}>Tap to copy · Apply at checkout</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Take full quiz link */}
-                <div style={{ textAlign: "center", marginTop: 14 }}>
-                  <a href="https://angellift.com/pages/product-quiz" target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 13, color: "#8B7355", textDecoration: "underline", textUnderlineOffset: 3 }}>
-                    Want more detail? Take our full 60-second quiz →
-                  </a>
-                </div>
-
-                {/* Retake */}
-                <div style={{ textAlign: "center", marginTop: 8 }}>
-                  <button onClick={reset} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#9A8E82", textDecoration: "underline", textUnderlineOffset: 3, padding: "8px 16px" }}>
-                    Scan again
-                  </button>
-                </div>
-              </div>
-            )}
+            {rightContent}
+          </div>
+          {/* ── RIGHT SIDE (mobile, inside dark box) ── */}
+          <div className="az-right-mobile">
+            <div style={{ background: "#FAFAF7", borderRadius: 12, width: "100%", overflow: "hidden" }}>
+              {rightContent}
+            </div>
           </div>
         </div>
       </div>
