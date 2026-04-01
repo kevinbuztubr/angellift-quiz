@@ -108,6 +108,9 @@ export default function SkinAnalyzer() {
   const [captured, setCaptured] = useState(null);
   const [analysisStep, setAnalysisStep] = useState(0);
   const [fakeMetrics, setFakeMetrics] = useState({});
+  const [email, setEmail] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [copying, setCopying] = useState(false);
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -227,6 +230,33 @@ export default function SkinAnalyzer() {
     });
   };
 
+  const handleEmailSubmit = () => {
+    if (!email || !email.includes("@")) return;
+    setEmailSubmitted(true);
+    try {
+      const profileData = {
+        "$email": email,
+        "Analyzer - Concern": concern || "",
+        "Analyzer - Recommended Product": product ? product.name : "",
+        "Analyzer - Completed": "Yes",
+        "Analyzer - Discount Code": "START10",
+      };
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "klaviyo_identify", data: profileData }, "*");
+        window.parent.postMessage({ type: "klaviyo_track", event: "Analyzer Completed", data: {
+          concern: concern,
+          recommended_product: product ? product.name : "",
+          recommended_product_price: product ? product.price : "",
+          recommended_product_variant: product ? product.variantId : "",
+          discount_code: "START10",
+          email: email,
+        }}, "*");
+        window.parent.postMessage({ type: "meta_pixel", event: "Lead", data: { content_name: "Analyzer Discount Capture", content_category: concern || "" }}, "*");
+        window.parent.postMessage({ type: "gtag_event", event: "generate_lead", data: { currency: "USD", value: 0 }}, "*");
+      }
+    } catch (e) {}
+  };
+
   const reset = () => {
     setPhase("ready");
     setConcern(null);
@@ -234,6 +264,9 @@ export default function SkinAnalyzer() {
     setCaptured(null);
     setAnalysisStep(0);
     setFakeMetrics({});
+    setEmail("");
+    setEmailSubmitted(false);
+    setCopying(false);
   };
 
   /* ── Auto-resize iframe ── */
@@ -492,6 +525,57 @@ export default function SkinAnalyzer() {
                         fontSize: 15, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase",
                         borderRadius: 50, boxShadow: "0 4px 20px rgba(107, 93, 79, 0.25)", boxSizing: "border-box",
                       }}>Buy Now →</a>
+
+                    {/* Discount email capture */}
+                    {!emailSubmitted ? (
+                      <div style={{ marginTop: 16, padding: "16px", background: "linear-gradient(135deg, #FBF7F2, #F5EDE4)", borderRadius: 14, border: "1.5px solid #EDEAE5" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                          <span style={{ fontSize: 18 }}>🎁</span>
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: "#1A1612" }}>First time? Get 10% off</div>
+                            <div style={{ fontSize: 12, color: "#6B5D4F" }}>Enter your email for code <span style={{ color: "#C0392B", fontWeight: 600 }}>· expires tonight</span></div>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
+                            onKeyDown={e => { if (e.key === "Enter") handleEmailSubmit(); }}
+                            style={{
+                              flex: 1, padding: "12px 14px", border: "1.5px solid #EDEAE5", borderRadius: 12,
+                              fontSize: 15, color: "#1A1612", background: "white", outline: "none",
+                              boxSizing: "border-box", minWidth: 0, fontFamily: "inherit",
+                            }}
+                            onFocus={e => e.target.style.borderColor = "#C4A882"}
+                            onBlur={e => e.target.style.borderColor = "#EDEAE5"}
+                          />
+                          <button onClick={handleEmailSubmit} style={{
+                            padding: "12px 16px", border: "none", borderRadius: 12, cursor: "pointer",
+                            background: "#6B5D4F", color: "#F5F0EB", fontSize: 14, fontWeight: 700,
+                            whiteSpace: "nowrap", flexShrink: 0,
+                          }}>Get Code</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: 16, padding: "16px", background: "linear-gradient(135deg, #F0EBE3, #E8DFD3)", borderRadius: 14, textAlign: "center", border: "2px solid #C4A882" }}>
+                        <div style={{ fontSize: 24, marginBottom: 6 }}>🎉</div>
+                        <div style={{ fontSize: 16, fontWeight: 600, color: "#1A1612", marginBottom: 8 }}>Your 10% discount code:</div>
+                        <div style={{
+                          fontSize: 24, fontWeight: 700, color: "#6B5D4F", background: "white",
+                          padding: "10px 20px", borderRadius: 10, letterSpacing: "0.15em",
+                          border: "2px dashed #C4A882", display: "inline-block", cursor: "pointer",
+                          userSelect: "all", WebkitUserSelect: "all",
+                        }}
+                        onClick={() => {
+                          try { navigator.clipboard.writeText("START10"); } catch(e) {
+                            const ta = document.createElement("textarea"); ta.value = "START10"; ta.style.position = "fixed"; ta.style.left = "-9999px";
+                            document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+                          }
+                          setCopying(true); setTimeout(() => setCopying(false), 2000);
+                        }}>
+                          {copying ? "✅ Copied!" : "START10"}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B5D4F", marginTop: 8 }}>Tap to copy · Apply at checkout</div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
