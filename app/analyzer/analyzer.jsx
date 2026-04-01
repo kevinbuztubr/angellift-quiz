@@ -153,27 +153,43 @@ export default function SkinAnalyzer() {
     const ctx = canvas.getContext("2d");
     const w = canvas.width;
     const h = canvas.height;
-    const centerX = Math.floor(w * 0.3);
-    const centerY = Math.floor(h * 0.3);
-    const sampleW = Math.floor(w * 0.4);
-    const sampleH = Math.floor(h * 0.4);
+    const centerX = Math.floor(w * 0.25);
+    const centerY = Math.floor(h * 0.25);
+    const sampleW = Math.floor(w * 0.5);
+    const sampleH = Math.floor(h * 0.5);
     const data = ctx.getImageData(centerX, centerY, sampleW, sampleH).data;
     let skinPixels = 0;
     let totalPixels = 0;
+    const brightnesses = [];
+    const redValues = [];
     for (let i = 0; i < data.length; i += 16) {
       const r = data[i], g = data[i+1], b = data[i+2];
       totalPixels++;
-      // Broad skin tone detection across all ethnicities
+      brightnesses.push((r + g + b) / 3);
+      redValues.push(r);
       if (r > 60 && g > 40 && b > 20 &&
           r > g && r > b &&
-          Math.abs(r - g) > 10 &&
-          r - b > 15 &&
-          !(r > 220 && g > 220 && b > 220) && // not pure white
-          !(r < 80 && g < 80 && b < 80)) { // not pure black/dark
+          Math.abs(r - g) > 12 &&
+          r - b > 20 &&
+          !(r > 220 && g > 220 && b > 220) &&
+          !(r < 70 && g < 70 && b < 70)) {
         skinPixels++;
       }
     }
-    return (skinPixels / totalPixels) > 0.15; // at least 15% skin-like pixels
+    const skinRatio = skinPixels / totalPixels;
+    // Calculate brightness variance (faces have shadows + highlights, walls are flat)
+    const avgBright = brightnesses.reduce((a, b) => a + b, 0) / brightnesses.length;
+    const variance = brightnesses.reduce((sum, b) => sum + Math.pow(b - avgBright, 2), 0) / brightnesses.length;
+    const stdDev = Math.sqrt(variance);
+    // Calculate color range (faces have lips, skin, shadows = wide range; walls = narrow)
+    const minRed = Math.min(...redValues);
+    const maxRed = Math.max(...redValues);
+    const redRange = maxRed - minRed;
+    // Must pass ALL checks:
+    // 1. At least 15% skin-colored pixels
+    // 2. Brightness std dev > 15 (face has variation; flat wall is ~5-10)
+    // 3. Red channel range > 40 (face has different zones; uniform surface is < 30)
+    return skinRatio > 0.15 && stdDev > 15 && redRange > 40;
   };
 
   const takePhoto = () => {
