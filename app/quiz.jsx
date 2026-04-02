@@ -481,7 +481,7 @@ function PhotoStep({ onPhoto, onSkip, areas }) {
           ))}
           {analysisStep >= 4 && (
             <div style={{ marginTop: 12, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#8B7355", fontWeight: 600, animation: "fadeSlideUp 0.4s ease" }}>
-              Analysis complete \u2014 loading results\u2026
+              Analysis complete — loading results…
             </div>
           )}
         </div>
