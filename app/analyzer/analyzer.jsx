@@ -68,50 +68,6 @@ const REASONS = {
   },
 };
 
-/* ── Analysis metrics per concern (reverse-engineered from product) ── */
-function rand(min, max) { return +(min + Math.random() * (max - min)).toFixed(1); }
-function randInt(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
-
-function getAnalysisMetrics(concern) {
-  const metrics = {
-    marionette: {
-      lineDepth: { value: rand(0.8, 1.1), unit: "mm", label: "Line depth", status: "Moderate-deep", statusColor: "#C0392B" },
-      liftRequired: { value: "0.52", unit: "N", label: "Lift required", status: "Professional grade", statusColor: "#6B5D4F" },
-      collagenDensity: { value: randInt(58, 68), unit: "%", label: "Collagen density", status: "Below optimal", statusColor: "#C0392B" },
-      elasticity: { value: randInt(48, 56), unit: "/100", label: "Elasticity score", status: "Fair", statusColor: "#C4A882" },
-      confidence: randInt(95, 98),
-      summary: (m) => `Marionette lines detected at ${m.lineDepth.value}mm depth. Your ${m.liftRequired.value}N treatment plan targets sub-dermal collagen regeneration.`,
-    },
-    nasolabial: {
-      lineDepth: { value: rand(0.7, 1.0), unit: "mm", label: "Line depth", status: "Moderate-deep", statusColor: "#C0392B" },
-      liftRequired: { value: "0.52", unit: "N", label: "Lift required", status: "Professional grade", statusColor: "#6B5D4F" },
-      collagenDensity: { value: randInt(55, 65), unit: "%", label: "Collagen density", status: "Below optimal", statusColor: "#C0392B" },
-      elasticity: { value: randInt(50, 58), unit: "/100", label: "Elasticity score", status: "Fair", statusColor: "#C4A882" },
-      confidence: randInt(95, 98),
-      summary: (m) => `Nasolabial folds at ${m.lineDepth.value}mm depth. Sustained ${m.liftRequired.value}N pressure corrects this at the structural level.`,
-    },
-    lip: {
-      volumeLoss: { value: randInt(30, 38), unit: "%", label: "Lip volume loss", status: "Moderate-high", statusColor: "#C0392B" },
-      liftRequired: { value: "0.39", unit: "N", label: "Vertical lift", status: "Vermilion grade", statusColor: "#6B5D4F" },
-      lineDepth: { value: rand(0.4, 0.7), unit: "mm", label: "Lip line depth", status: "Moderate", statusColor: "#C4A882" },
-      borderDef: { value: randInt(38, 46), unit: "/100", label: "Border definition", status: "Below average", statusColor: "#C0392B" },
-      confidence: randInt(94, 97),
-      summary: (m) => `${m.volumeLoss.value}% lip volume loss with ${m.lineDepth.value}mm line depth. Targeted ${m.liftRequired.value}N vertical lift restores definition naturally.`,
-    },
-    perioral: {
-      microLineDepth: { value: rand(0.2, 0.4), unit: "mm", label: "Micro-line depth", status: "Fine", statusColor: "#C4A882" },
-      liftRequired: { value: "0.024", unit: "N", label: "Lift required", status: "Collagen grade", statusColor: "#6B5D4F" },
-      regenPotential: { value: randInt(78, 88), unit: "%", label: "Regen. potential", status: "High", statusColor: "#4CAF50" },
-      skinRenewal: { value: randInt(68, 78), unit: "/100", label: "Skin renewal", status: "Good", statusColor: "#4CAF50" },
-      confidence: randInt(93, 97),
-      summary: (m) => `Fine lines at ${m.microLineDepth.value}mm with ${m.regenPotential.value}% regeneration potential. Your skin responds best to ${m.liftRequired.value}N collagen stimulation.`,
-    },
-  };
-  const m = metrics[concern] || metrics.marionette;
-  const { summary, confidence, ...metricCards } = m;
-  return { cards: metricCards, summary: summary(metricCards), confidence };
-}
-
 function pickProduct(concern) {
   const rec = RECOMMENDATIONS[concern] || RECOMMENDATIONS.marionette;
   return PRODUCTS[rec.primary];
@@ -146,13 +102,12 @@ function fireEvent(type, event, data) {
    MAIN COMPONENT
    ══════════════════════════════════════════════ */
 export default function SkinAnalyzer() {
-  const [phase, setPhase] = useState("ready"); // ready | camera | captured | analyzing | choosing | analysis_results | result
+  const [phase, setPhase] = useState("ready"); // ready | camera | captured | analyzing | choosing | result
   const [concern, setConcern] = useState(null);
   const [product, setProduct] = useState(null);
   const [captured, setCaptured] = useState(null);
   const [analysisStep, setAnalysisStep] = useState(0);
   const [fakeMetrics, setFakeMetrics] = useState({});
-  const [analysisMetrics, setAnalysisMetrics] = useState(null);
   const [email, setEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [copying, setCopying] = useState(false);
@@ -160,8 +115,6 @@ export default function SkinAnalyzer() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
-  const concernTimeoutRef = useRef(null);
-  const analysisTimeoutsRef = useRef([]);
 
   /* ── Camera controls ── */
   const stopCamera = useCallback(() => {
@@ -268,31 +221,21 @@ export default function SkinAnalyzer() {
   const confirmPhoto = () => {
     setPhase("analyzing");
     setAnalysisStep(0);
-    setFakeMetrics({});
-
-    // Clear any previous analysis timeouts
-    analysisTimeoutsRef.current.forEach(t => clearTimeout(t));
-    analysisTimeoutsRef.current = [];
 
     // Fake metrics appear over time
-    analysisTimeoutsRef.current.push(setTimeout(() => setFakeMetrics(m => ({ ...m, depth: "moderate" })), 800));
-    analysisTimeoutsRef.current.push(setTimeout(() => setFakeMetrics(m => ({ ...m, elasticity: "fair" })), 1600));
-    analysisTimeoutsRef.current.push(setTimeout(() => {
+    setTimeout(() => setFakeMetrics(m => ({ ...m, depth: "moderate" })), 800);
+    setTimeout(() => setFakeMetrics(m => ({ ...m, elasticity: "fair" })), 1600);
+    setTimeout(() => {
       setAnalysisStep(1);
-    }, 1200));
-    analysisTimeoutsRef.current.push(setTimeout(() => {
+    }, 1200);
+    setTimeout(() => {
       setAnalysisStep(2);
       setPhase("choosing");
-    }, 2400));
+    }, 2400);
   };
 
   const retakePhoto = () => {
-    // Clear any running timeouts
-    analysisTimeoutsRef.current.forEach(t => clearTimeout(t));
-    analysisTimeoutsRef.current = [];
-    if (concernTimeoutRef.current) clearTimeout(concernTimeoutRef.current);
     setCaptured(null);
-    setFakeMetrics({});
     startCamera();
   };
 
@@ -300,16 +243,11 @@ export default function SkinAnalyzer() {
     setConcern(id);
     setAnalysisStep(3);
 
-    // Clear any previous timeout to prevent race condition
-    if (concernTimeoutRef.current) clearTimeout(concernTimeoutRef.current);
-
-    // Generate metrics and show analysis results after short delay
-    concernTimeoutRef.current = setTimeout(() => {
+    // Finish analysis after short delay
+    setTimeout(() => {
       const rec = pickProduct(id);
       setProduct(rec);
-      const metrics = getAnalysisMetrics(id);
-      setAnalysisMetrics(metrics);
-      setFakeMetrics(m => ({ ...m, lift: rec.liftForce, confidence: metrics.confidence + "%" }));
+      setFakeMetrics(m => ({ ...m, lift: rec.liftForce, confidence: "98%" }));
 
       fireEvent("klaviyo_track", "Quiz Results Viewed", {
         areas: [id],
@@ -329,12 +267,8 @@ export default function SkinAnalyzer() {
         currency: "USD",
       });
 
-      setPhase("analysis_results");
+      setPhase("result");
     }, 1200);
-  };
-
-  const viewTreatment = () => {
-    setPhase("result");
   };
 
   const handleBuyNow = () => {
@@ -398,17 +332,12 @@ export default function SkinAnalyzer() {
   };
 
   const reset = () => {
-    // Clear any running timeouts
-    analysisTimeoutsRef.current.forEach(t => clearTimeout(t));
-    analysisTimeoutsRef.current = [];
-    if (concernTimeoutRef.current) clearTimeout(concernTimeoutRef.current);
     setPhase("ready");
     setConcern(null);
     setProduct(null);
     setCaptured(null);
     setAnalysisStep(0);
     setFakeMetrics({});
-    setAnalysisMetrics(null);
     setEmail("");
     setEmailSubmitted(false);
     setCopying(false);
@@ -438,13 +367,13 @@ export default function SkinAnalyzer() {
                     <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(139,115,85,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </div>
-                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>3-second skin scan</div>
+                    <div style={{ fontSize: 20, color: "#3D3428", fontWeight: 500, fontFamily: "Georgia, serif" }}>How it works</div>
                     <div style={{ fontSize: 14, color: "#6B5D4F", lineHeight: 1.6, maxWidth: 240 }}>
-                      Snap a quick photo of your mouth area. Our AI will analyze your skin and recommend the perfect DermaStrip.
+                      Take a quick selfie of your lower face. Our AI analyzes your skin and tells you exactly which DermaStrip to start with.
                     </div>
                     <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 12, color: "#9A8E82" }}>
-                      <span>✅ Clinically proven</span>
-                      <span>🦈 Shark Tank Winner</span>
+                      <span>✅ Takes 10 seconds</span>
+                      <span>🔒 Photo never stored</span>
                     </div>
                   </div>
                 )}
@@ -538,45 +467,13 @@ export default function SkinAnalyzer() {
                   </div>
                 )}
     
-                {/* Analysis results: show metrics before product */}
-                {phase === "analysis_results" && analysisMetrics && (
-                  <div style={{ padding: "20px", width: "100%", animation: "fadeIn 0.6s ease" }}>
-                    <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#8B7355", fontWeight: 600, marginBottom: 12, textAlign: "center" }}>Your skin analysis</div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
-                      {Object.values(analysisMetrics.cards).map((m, i) => (
-                        <div key={i} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "0.5px solid #ede8e0" }}>
-                          <div style={{ fontSize: 9, color: "#8B7355", textTransform: "uppercase", letterSpacing: 1, fontWeight: 500, marginBottom: 2 }}>{m.label}</div>
-                          <div style={{ fontSize: 22, fontWeight: 700, color: "#1A1612", lineHeight: 1.1 }}>
-                            {m.value}<span style={{ fontSize: 12, fontWeight: 500 }}>{m.unit}</span>
-                          </div>
-                          <div style={{ fontSize: 10, color: m.statusColor, fontWeight: 500 }}>{m.status}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div style={{ background: "rgba(139,115,85,0.06)", borderRadius: 8, padding: 12, marginBottom: 16 }}>
-                      <div style={{ fontSize: 13, color: "#3D3428", lineHeight: 1.55 }}>{analysisMetrics.summary}</div>
-                    </div>
-
-                    <button onClick={viewTreatment} style={{
-                      display: "block", width: "100%", padding: "16px 24px", textAlign: "center",
-                      background: "#6B5D4F", color: "#F5F0EB", border: "none",
-                      fontSize: 14, fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase",
-                      borderRadius: 50, cursor: "pointer", boxSizing: "border-box",
-                    }}>View my treatment plan</button>
-
-                    <div style={{ textAlign: "center", marginTop: 10, fontSize: 10, color: "#9A8E82" }}>Analysis confidence: {analysisMetrics.confidence}%</div>
-                  </div>
-                )}
-
                 {/* Result: product card */}
                 {phase === "result" && product && (
                   <div style={{ width: "100%", animation: "fadeIn 0.6s ease" }}>
                     <div style={{ border: "2px solid #C4A882", borderRadius: 16, overflow: "hidden", background: "#FAFAF7" }}>
                       {/* Badge */}
                       <div style={{ background: "linear-gradient(135deg, #6B5D4F, #8B7355)", padding: "10px 16px", textAlign: "center", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#F5F0EB" }}>
-                        ⭐ Your recommended treatment
+                        ⭐ Your perfect match
                       </div>
     
                       <div style={{ padding: "20px 18px" }}>
@@ -595,17 +492,14 @@ export default function SkinAnalyzer() {
                           </div>
                         </div>
     
-                        {/* Why this product - references analysis */}
+                        {/* Why this product */}
                         <div style={{ fontSize: 13, color: "#4A4340", lineHeight: 1.6, marginBottom: 14, padding: "10px 12px", background: "rgba(139,115,85,0.04)", borderRadius: 10 }}>
-                          {analysisMetrics ? analysisMetrics.summary : (REASONS[product.id]?.[concern] || product.tagline)}
+                          {REASONS[product.id]?.[concern] || product.tagline}
                         </div>
     
-                        {/* Features - reference analysis numbers */}
+                        {/* Features */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#3D3428" }}>
-                            <span style={{ color: "#4CAF50", fontWeight: 700, fontSize: 14 }}>✓</span> Matches your {product.liftForce} lift requirement
-                          </div>
-                          {product.features.slice(1).map(f => (
+                          {product.features.map(f => (
                             <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#3D3428" }}>
                               <span style={{ color: "#4CAF50", fontWeight: 700, fontSize: 14 }}>✓</span> {f}
                             </div>
@@ -766,7 +660,7 @@ export default function SkinAnalyzer() {
               </>
             )}
 
-            {(phase === "captured" || phase === "bad_photo" || phase === "analyzing" || phase === "choosing" || phase === "analysis_results" || phase === "result") && (
+            {(phase === "captured" || phase === "bad_photo" || phase === "analyzing" || phase === "choosing" || phase === "result") && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: 20, textAlign: "center", width: "100%" }}>
                 {/* Scanning circle */}
                 <div style={{ width: 120, height: 96, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -775,11 +669,11 @@ export default function SkinAnalyzer() {
                   )}
                   <div style={{
                     width: 120, height: 96, borderRadius: "50%", overflow: "hidden",
-                    border: (phase === "result" || phase === "analysis_results") ? "2px solid #C4A882" : phase === "bad_photo" ? "2px solid #E24B4A" : "2px solid rgba(196,168,130,0.4)",
+                    border: phase === "result" ? "2px solid #C4A882" : phase === "bad_photo" ? "2px solid #E24B4A" : "2px solid rgba(196,168,130,0.4)",
                   }}>
                     {captured && <img src={captured} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: phase === "captured" ? 1 : 0.6 }} />}
                   </div>
-                  {(phase === "result" || phase === "analysis_results") && (
+                  {phase === "result" && (
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                         <circle cx="16" cy="16" r="14" fill="rgba(0,0,0,0.4)"/>
@@ -822,7 +716,7 @@ export default function SkinAnalyzer() {
                     </div>
                   </>
                 )}
-                {(phase === "result" || phase === "analysis_results") && (
+                {phase === "result" && (
                   <>
                     <div style={{ color: "#C4A882", fontSize: 14, fontWeight: 600 }}>Analysis complete</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
